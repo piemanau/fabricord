@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.limeshulkerbox.fdcac.mixins",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "GetServerMixin",
+    "PlayerManagerMixin",
+    "ServerPlayerEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

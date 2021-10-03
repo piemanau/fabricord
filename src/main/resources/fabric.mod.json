@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "fdcac",
+  "version": "${version}",
+  "name": "FDCAC",
+  "description": "Good luck seeing this server-side LOL",
+  "authors": [
+    "LimeShulkerBox"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/fabric-discord-chat-and-console",
+    "sources": "https://github.com/LimeShulkerBox/fabric-discord-chat-and-console",
+    "issues": "https://github.com/LimeShulkerBox/fabric-discord-chat-and-console/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/fdcac/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "com.limeshulkerbox.fdcac.other.ServerInitializer"
+    ]
+  },
+  "mixins": [
+    "fdcac.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.7",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "java": ">=16"
+  }
+}
