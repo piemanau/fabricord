@@ -79,16 +79,13 @@ public class ChatThroughDiscord extends ListenerAdapter {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else {
-            if (previousDiscordMessage == null) {
-                previousDiscordMessage = "LimeShulkerBox is cool";
-            }
-            if (previousDiscordMessage.equals(content)) {
+
+            } else {
+            if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID()))) {
                 return;
             }
-            previousDiscordMessage = content;
             //Send message to Minecraft chat
-            ServerInitializer.sendMessage(Text.of("[" + event.getMember().getUser().getName() + "] " + content), false, false, true, true);
+            ServerInitializer.sendMessage(Text.of("[" + event.getMember().getUser().getName() + "] " + content), false, false, true, false);
         }
     }
 }

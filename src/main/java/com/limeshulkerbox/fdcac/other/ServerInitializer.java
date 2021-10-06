@@ -3,13 +3,9 @@ package com.limeshulkerbox.fdcac.other;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.limeshulkerbox.fdcac.events.GetServerStartedEvent;
-import com.limeshulkerbox.fdcac.events.GetServerStartingEvent;
-import com.limeshulkerbox.fdcac.events.GetServerStoppedEvent;
-import com.limeshulkerbox.fdcac.events.GetServerStoppingEvent;
+import com.limeshulkerbox.fdcac.events.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,8 +13,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.MessageType;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -27,6 +23,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Environment(EnvType.SERVER)
 public class ServerInitializer implements DedicatedServerModInitializer {
@@ -34,11 +33,13 @@ public class ServerInitializer implements DedicatedServerModInitializer {
     public static Config config;
     public static boolean jdaReady = false;
     static JDA api;
-    static TextChannel chatChannel;
-    static TextChannel consoleChannel;
-    static String previousDiscordMessage;
+    static Text previousDiscordConsoleMessage;
+    static Text previousDiscordChatMessage;
+    static Text previousMinecraftChatMessage;
+    static boolean sendNextDiscordMessage = true;
     static Path configPath = Paths.get(FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fdcac.json");
     private static MinecraftDedicatedServer server;
+    private static List<ServerPlayerEntity> players;
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     //Return the server variable
@@ -51,6 +52,11 @@ public class ServerInitializer implements DedicatedServerModInitializer {
         ServerInitializer.server = server;
     }
 
+    //Sets the server variable to use for commands
+    public static void setPlayerVariable(List<ServerPlayerEntity> players) {
+        ServerInitializer.players = players;
+    }
+
     public static void stopDiscordBot() {
         if (api == null) return;
         api.shutdown();
@@ -58,26 +64,46 @@ public class ServerInitializer implements DedicatedServerModInitializer {
 
     //For sending messages to Discord and Minecraft
     public static void sendMessage(Text message, boolean sendToDiscordChat, boolean sendToDiscordConsole, boolean sendToMinecraft, boolean ignoreDuplicateMessages) {
-        if (previousDiscordMessage == null)
-            previousDiscordMessage = "LimeShulkerBox is cool";
-        if (!ignoreDuplicateMessages) {
-            if (previousDiscordMessage.equals(message.getString())) return;
-            previousDiscordMessage = message.getString();
-        }
+        //if (previousDiscordConsoleMessage == null)
+        //    previousDiscordConsoleMessage = Text.of("LimeShulkerBox is cool");
+        //if (previousDiscordChatMessage == null)
+        //    previousDiscordChatMessage = Text.of("LimeShulkerBox is cool");
+        //if (previousMinecraftChatMessage == null)
+        //    previousMinecraftChatMessage = Text.of("LimeShulkerBox is cool");
+        //if (!ignoreDuplicateMessages) {
+        //    if (previousDiscordConsoleMessage.equals(message) || previousDiscordChatMessage.equals(message)) {
+        //        return;
+        //    }
+        //}
+        //if (sendToDiscordConsole) {
+        //    previousDiscordConsoleMessage = message;
+        //}
+        //if (sendToDiscordChat) {
+        //    previousDiscordChatMessage = message;
+        //}
+        //if (sendToMinecraft) {
+        //    if (!previousMinecraftChatMessage.equals(previousDiscordChatMessage)) {
+        //        sendNextDiscordMessage = true;
+        //    } else {
+        //        sendNextDiscordMessage = false;
+        //    }
+        //    previousMinecraftChatMessage = message;
+        //}
         if (jdaReady) {
-            if (sendToDiscordChat) {
-                chatChannel = api.getTextChannelById(config.getChatChannelID());
-                assert chatChannel != null;
-                chatChannel.sendMessage(message.getString()).queue();
+            if (sendToMinecraft) {
+                server.sendSystemMessage(message, null);
+
+                for (ServerPlayerEntity serverPlayerEntity : players) {
+                    serverPlayerEntity.sendMessage(message, MessageType.CHAT, UUID.randomUUID());
+                }
+            }
+
+            if (sendToDiscordChat && sendNextDiscordMessage) {
+                Objects.requireNonNull(api.getTextChannelById(config.getChatChannelID())).sendMessage(message.getString()).queue();
             }
 
             if (sendToDiscordConsole) {
-                consoleChannel = api.getTextChannelById(config.getConsoleChannelID());
-                assert consoleChannel != null;
-                consoleChannel.sendMessage(message.getString()).queue();
-            }
-            if (sendToMinecraft) {
-                getServerVariable().getPlayerManager().broadcastChatMessage(message, MessageType.CHAT, Util.NIL_UUID);
+                Objects.requireNonNull(api.getTextChannelById(config.getConsoleChannelID())).sendMessage(message.getString()).queue();
             }
         }
     }
@@ -102,10 +128,6 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                     "Server stopping",
                     "Server stopped",
                     false);
-        }
-        if (jdaReady) {
-            consoleChannel = api.getTextChannelById(config.getConsoleChannelID());
-            chatChannel = api.getTextChannelById(config.getChatChannelID());
         }
     }
 
@@ -151,9 +173,6 @@ public class ServerInitializer implements DedicatedServerModInitializer {
         } catch (LoginException e) {
             e.printStackTrace();
         }
-
-        consoleChannel = api.getTextChannelById(config.getConsoleChannelID());
-        chatChannel = api.getTextChannelById(config.getChatChannelID());
 
         //Register and make appender
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);

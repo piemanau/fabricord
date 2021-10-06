@@ -16,6 +16,6 @@ class ServerPlayerEntityMixin {
 
     @Inject(method = "sendMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V", at = @At(value = "HEAD"))
     public void getMessage(Text message, MessageType type, UUID sender, CallbackInfo ci) {
-        ServerInitializer.sendMessage(message, true, false, false, true);
+        ServerInitializer.sendMessage(message, true, false, false, false);
     }
 }
