@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "fdcac",
+  "id": "fabricord",
   "version": "${version}",
-  "name": "FDCAC",
+  "name": "Fabricord",
   "description": "Good luck seeing this server-side LOL",
   "authors": [
     "LimeShulkerBox"
@@ -17,11 +17,11 @@
   "environment": "server",
   "entrypoints": {
     "server": [
-      "com.limeshulkerbox.fdcac.other.ServerInitializer"
+      "com.limeshulkerbox.fabricord.minecraft.ServerInitializer"
     ]
   },
   "mixins": [
-    "fdcac.mixins.json"
+    "fabricord.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.11.7",

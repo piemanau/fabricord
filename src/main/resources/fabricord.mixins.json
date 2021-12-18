@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.limeshulkerbox.fdcac.mixins",
+  "package": "com.limeshulkerbox.fabricord.minecraft.mixins",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "GetServerMixin",

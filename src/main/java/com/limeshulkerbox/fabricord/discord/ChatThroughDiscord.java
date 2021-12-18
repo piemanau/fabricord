@@ -1,40 +1,43 @@
-package com.limeshulkerbox.fdcac.other;
+package com.limeshulkerbox.fabricord.discord;
 
+import com.limeshulkerbox.fabricord.api.v1.API;
+import com.limeshulkerbox.fabricord.minecraft.GetPlayersInterface;
+import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
+import com.limeshulkerbox.fabricord.minecraft.mixins.PlayerManagerMixin;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.Objects;
 
-public class ChatThroughDiscord extends ListenerAdapter {
+public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigsInterface, GetPlayersInterface {
 
     static String content;
-    static String previousDiscordMessage;
 
     public ChatThroughDiscord() {
     }
 
     //Prompts
     public static void serverStartingMethod() {
-        ServerInitializer.sendMessage(Text.of(ServerInitializer.config.getServerStartingPrompt()), true, false, false, true);
+        API.sendMessage(ServerInitializer.config.getServerStartingPrompt(), false, true, false);
     }
 
     public static void serverStartedMethod() {
-        ServerInitializer.sendMessage(Text.of(ServerInitializer.config.getServerStartedPrompt()), true, false, false, true);
+        API.sendMessage(ServerInitializer.config.getServerStartedPrompt(), false,true, false);
     }
 
     public static void serverStoppingMethod() {
-        ServerInitializer.sendMessage(Text.of(ServerInitializer.config.getServerStoppingPrompt()), true, false, false, true);
+        API.sendMessage(ServerInitializer.config.getServerStoppingPrompt(), false, true, false);
     }
 
     public static void serverStoppedMethod() {
-        ServerInitializer.sendMessage(Text.of(ServerInitializer.config.getServerStoppedPrompt()), true, false, false, true);
+        API.sendMessage(ServerInitializer.config.getServerStoppedPrompt(), false, true, false);
     }
 
     @Override
@@ -59,23 +62,27 @@ public class ChatThroughDiscord extends ListenerAdapter {
                 return;
             }
 
-            //Updates the config if /updateconfigs is run
-            //TODO: change /updateconfigs to a discord / command
-            if (content.toLowerCase(Locale.ROOT).equals("/updateconfigs")) {
-                new ServerInitializer().updateConfigs();
-                ServerInitializer.sendMessage(Text.of("Configs updated!"), true, false, false, true);
-                return;
-            }
             //Check correct channel
             if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())) && ServerInitializer.config.getCommandsInChatChannel()) {
                 event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").queue();
                 return;
             }
+
+            //Updates the config if /updateconfigs is run
+            //TODO: change /updateconfigs to a discord / command
+            if (content.toLowerCase(Locale.ROOT).equals("/updateconfigs")) {
+                updateConfigs();
+                API.sendMessageToDiscord("Configs updated!", event.getChannel());
+                return;
+            } else if (content.toLowerCase(Locale.ROOT).equals("/list")) {
+                API.sendMessageToDiscord(getPlayers(), event.getChannel());
+            }
+
             //Register a new CommandManager
             CommandManager command = new CommandManager(CommandManager.RegistrationEnvironment.DEDICATED);
             try {
                 //Attempt to send command
-                command.execute(ServerInitializer.getServerVariable().getCommandSource(), content);
+                command.execute(API.getServerVariable().getCommandSource(), content);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -85,7 +92,7 @@ public class ChatThroughDiscord extends ListenerAdapter {
                 return;
             }
             //Send message to Minecraft chat
-            ServerInitializer.sendMessage(Text.of("[" + event.getMember().getUser().getName() + "] " + content), false, false, true, false);
+            API.sendMessage("[" + event.getMember().getUser().getName() + "] " + content, false, false, true);
         }
     }
 }

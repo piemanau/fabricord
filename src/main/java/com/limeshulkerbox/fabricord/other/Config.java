@@ -1,4 +1,4 @@
-package com.limeshulkerbox.fdcac.other;
+package com.limeshulkerbox.fabricord.other;
 
 public class Config {
 
@@ -15,21 +15,40 @@ public class Config {
     private String serverStoppingPrompt;
     private String serverStoppedPrompt;
     private boolean showDebugLogsInConsole;
+    private boolean showErrorLogsInConsole;
+    private boolean showWarnLogsInConsole;
+    private boolean showInfoLogsInConsole;
+    private String webhookURL;
+    private boolean webhooksEnabled;
+    private String[] keysToSendToDiscord;
+    private String[] commandsForEveryone;
 
-    public Config(String botToken, String chatChannelID, String consoleChannelID, String commandsAccessRoleID, boolean chatEnabled, boolean commandsInChatChannel, boolean consoleEnabled, boolean promptsEnabled, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, boolean showDebugLogsInConsole) {
+    public Config(String botToken, String commandsAccessRoleID, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone) {
         this.botToken = botToken;
         this.commandsAccessRoleID = commandsAccessRoleID;
+
         this.chatEnabled = chatEnabled;
-        this.commandsInChatChannel = commandsInChatChannel;
         this.chatChannelID = chatChannelID;
+        this.commandsInChatChannel = commandsInChatChannel;
+        this.promptsEnabled = promptsEnabled;
+
         this.consoleEnabled = consoleEnabled;
         this.consoleChannelID = consoleChannelID;
-        this.promptsEnabled = promptsEnabled;
+        this.showDebugLogsInConsole = showDebugLogsInConsole;
+        this.showErrorLogsInConsole = showErrorLogsInConsole;
+        this.showWarnLogsInConsole = showWarnLogsInConsole;
+        this.showInfoLogsInConsole = showInfoLogsInConsole;
+
+        this.webhooksEnabled = webhooksEnabled;
+        this.webhookURL = webhookURL;
+
         this.serverStartingPrompt = serverStartingPrompt;
         this.serverStartedPrompt = serverStartedPrompt;
         this.serverStoppingPrompt = serverStoppingPrompt;
         this.serverStoppedPrompt = serverStoppedPrompt;
-        this.showDebugLogsInConsole = showDebugLogsInConsole;
+
+        this.commandsForEveryone = commandsForEveryone;
+        this.keysToSendToDiscord = keysToSendToDiscord;
     }
 
     public String getBotToken() {
@@ -134,5 +153,61 @@ public class Config {
 
     public void setShowDebugLogsInConsole(boolean showDebugLogsInConsole) {
         this.showDebugLogsInConsole = showDebugLogsInConsole;
+    }
+
+    public boolean getShowErrorLogsInConsole() {
+        return showErrorLogsInConsole;
+    }
+
+    public void setShowErrorLogsInConsole(boolean showErrorLogsInConsole) {
+        this.showErrorLogsInConsole = showErrorLogsInConsole;
+    }
+
+    public boolean getShowWarnLogsInConsole() {
+        return showWarnLogsInConsole;
+    }
+
+    public void setShowWarnLogsInConsole(boolean showWarnLogsInConsole) {
+        this.showWarnLogsInConsole = showWarnLogsInConsole;
+    }
+
+    public boolean getShowInfoLogsInConsole() {
+        return showInfoLogsInConsole;
+    }
+
+    public void setShowInfoLogsInConsole(boolean showInfoLogsInConsole) {
+        this.showInfoLogsInConsole = showInfoLogsInConsole;
+    }
+
+    public String getWebhookURL() {
+        return webhookURL;
+    }
+
+    public void setWebhookURL(String webhookURL) {
+        this.webhookURL = webhookURL;
+    }
+
+    public boolean getWebhooksEnabled() {
+        return webhooksEnabled;
+    }
+
+    public void setWebhooksEnabled(boolean webhooksEnabled) {
+        this.webhooksEnabled = webhooksEnabled;
+    }
+
+    public String[] getCommandsForEveryone() {
+        return commandsForEveryone;
+    }
+
+    public void setCommandsForEveryone(String[] commandsForEveryone) {
+        this.commandsForEveryone = commandsForEveryone;
+    }
+
+    public String[] getKeysToSendToDiscord() {
+        return keysToSendToDiscord;
+    }
+
+    public void setKeysToSendToDiscord(String[] keysToSendToDiscord) {
+        this.keysToSendToDiscord = keysToSendToDiscord;
     }
 }

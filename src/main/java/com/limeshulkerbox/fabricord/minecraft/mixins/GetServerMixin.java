@@ -1,6 +1,6 @@
-package com.limeshulkerbox.fdcac.mixins;
+package com.limeshulkerbox.fabricord.minecraft.mixins;
 
-import com.limeshulkerbox.fdcac.other.ServerInitializer;
+import com.limeshulkerbox.fabricord.api.v1.API;
 import net.minecraft.server.Main;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +13,7 @@ public class GetServerMixin {
     @ModifyVariable(method = "main", at = @At(value = "STORE"), ordinal = 0)
     private static MinecraftDedicatedServer getDedicatedServer(MinecraftDedicatedServer minecraftDedicatedServer) {
         //Get the server variable
-        ServerInitializer.setServerVariable(minecraftDedicatedServer);
+        API.setServerVariable(minecraftDedicatedServer);
         return minecraftDedicatedServer;
     }
 }
