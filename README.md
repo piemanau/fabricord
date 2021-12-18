@@ -1,20 +1,8 @@
-# Pin that!
+# Fabricord
+This is a commission done for TheRanker which can be found https://www.curseforge.com/members/theranker24/projects, make sure to join my Discord if you would like one done! Or just to chat!
 
-This mod allows you to pin text to any corner on the HUD.
 
-## Usage:
+The available commands are any command that’s available to you in game. You just need the assigned role in discord to allow usage of the commands. It uses Fabric API and allows communication to and from discord. Config settings to allow roles to commands and to set your bot tokens and discord channels.
 
-To change the pinned message you can open the config via [ModMenu](https://www.curseforge.com/minecraft/mc-mods/modmenu),
-or you use the following chat commands:
 
--   `/pin set Your_Message` to change to message
--   `/pin clear` to clear the current message
-
-## Setup:
-
-1. Download the mod from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/pin-that).
-2. Drop the .jar file into the mods folder.
-
-## License
-
-MIT
+For support or just to chat join my Discord! https://discord.gg/XhHuYG7aXT
