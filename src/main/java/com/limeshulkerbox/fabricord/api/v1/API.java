@@ -38,7 +38,7 @@ public class API {
      * This is the message you want to send to the Minecraft chat.
      */
     public static void sendMessageToMinecraft(String message) {
-        server.getPlayerManager().broadcastChatMessage(Text.of(message), MessageType.CHAT, modUUID);
+        server.getPlayerManager().broadcast(Text.of(message), MessageType.CHAT, modUUID);
     }
 
     /**

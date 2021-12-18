@@ -31,7 +31,7 @@ public abstract class PlayerManagerMixin implements GetPlayersInterface {
     private static Text previousMessage = null;
     private static String previousKey = null;
 
-    @Inject(method = "broadcastChatMessage", at = @At(value = "HEAD"))
+    @Inject(method = "broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V", at = @At(value = "HEAD"))
     public void getMessage(Text message, MessageType type, UUID sender, CallbackInfo ci) throws IOException {
         String key = "this.cannot.be.blank";
         boolean sendToDiscord = true;

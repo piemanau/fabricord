@@ -113,6 +113,9 @@ public class ServerInitializer implements DedicatedServerModInitializer, UpdateC
                                     "serverStartedPrompt": "Server started",
                                     "serverStoppingPrompt": "Server stopping",
                                     "serverStoppedPrompt": "Server stopped"
+                                    
+                                    "commandsForEveryone": [""],
+                                    "keysToSendToDiscord": [""]
                                 }
                                         """;
                 Files.writeString(configPath, contents);
