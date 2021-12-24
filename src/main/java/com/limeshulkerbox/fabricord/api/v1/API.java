@@ -8,6 +8,7 @@ import net.minecraft.network.MessageType;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import net.minecraft.text.Text;
 
+import javax.management.timer.Timer;
 import java.util.Objects;
 
 import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.*;
@@ -15,6 +16,8 @@ import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.*;
 public class API {
 
     private static MinecraftDedicatedServer server;
+
+    private static Timer upTime = new Timer();
 
     /**
      * Send any message to any channel in a Discord server.
@@ -26,7 +29,7 @@ public class API {
 
     public static void sendMessageToDiscord(String message, MessageChannel channelID) {
         if (message.length() <= messageSplitterAmount) {
-            Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(String.valueOf(channelID))).sendMessage(message).queue();
+            Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(channelID.getId())).sendMessage(message).queue();
         } else {
             splitToNChar(message, messageSplitterAmount, channelID.toString());
         }
@@ -155,5 +158,9 @@ public class API {
         for (int i = 0; i < length; i += size) {
             Objects.requireNonNull(getDiscordApi().getTextChannelById(channelID)).sendMessage(text.substring(i, Math.min(length, i + size))).queue();
         }
+    }
+
+    public static Timer getUpTime() {
+        return upTime;
     }
 }

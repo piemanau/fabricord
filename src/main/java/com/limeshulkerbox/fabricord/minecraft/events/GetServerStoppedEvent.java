@@ -12,6 +12,7 @@ public class GetServerStoppedEvent implements ServerLifecycleEvents.ServerStoppe
         if (ServerInitializer.config.getPromptsEnabled()) {
             serverStoppedMethod();
             ServerInitializer.stopDiscordBot();
+            GetServerStartedEvent.thread.interrupt();
         }
     }
 }

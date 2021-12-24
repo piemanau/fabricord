@@ -1,22 +1,24 @@
 package com.limeshulkerbox.fabricord.discord;
 
 import com.limeshulkerbox.fabricord.api.v1.API;
-import com.limeshulkerbox.fabricord.minecraft.GetPlayersInterface;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
-import com.limeshulkerbox.fabricord.minecraft.mixins.PlayerManagerMixin;
+import me.lucko.spark.api.Spark;
+import me.lucko.spark.api.SparkProvider;
+import me.lucko.spark.api.statistic.StatisticWindow;
+import me.lucko.spark.api.statistic.types.DoubleStatistic;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.CommandManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Timer;
 
-public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigsInterface, GetPlayersInterface {
+public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigsInterface {
 
     static String content;
 
@@ -75,7 +77,32 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
                 API.sendMessageToDiscord("Configs updated!", event.getChannel());
                 return;
             } else if (content.toLowerCase(Locale.ROOT).equals("/list")) {
-                API.sendMessageToDiscord(getPlayers(), event.getChannel());
+                String[] playerNames = API.getServerVariable().getPlayerManager().getPlayerNames();
+                StringBuilder formattedString = new StringBuilder("");
+                if (API.getServerVariable().getCurrentPlayerCount() != 0) {
+                    formattedString.append("Players online are: ");
+                    for (int i = 0; i < playerNames.length - 1; i++) {
+                        formattedString.append(playerNames[i]).append(":").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getDimension()).append(", ");
+                    }
+                    formattedString.append(playerNames[playerNames.length - 1]).append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getDimension());
+                }
+                formattedString.append("\nThere are " );
+                formattedString.append(API.getServerVariable().getCurrentPlayerCount());
+                formattedString.append(" players out of ");
+                formattedString.append(API.getServerVariable().getMaxPlayerCount());
+                formattedString.append(" players.");
+                API.sendMessageToDiscord(formattedString.toString(), event.getChannel());
+            } else if (content.toLowerCase(Locale.ROOT).equals("/tps")) {
+                Spark spark = SparkProvider.get();
+                if (spark == null) return;
+                DoubleStatistic<StatisticWindow.TicksPerSecond> tps = spark.tps();
+                assert tps != null;
+                double tpsLast10Secs = tps.poll(StatisticWindow.TicksPerSecond.SECONDS_10);
+                double tpsLast5Mins = tps.poll(StatisticWindow.TicksPerSecond.MINUTES_5);
+                API.sendMessageToDiscord("The tps from the last 10 seconds: " + ((int) tpsLast10Secs) + "\nThe tps from the last 5 minutes: " + ((int) tpsLast5Mins), event.getChannel());
+                return;
+            } else if (content.toLowerCase(Locale.ROOT).equals("/uptime")) {
+                API.sendMessageToDiscord(API.getUpTime().toString(), event.getChannel());
             }
 
             //Register a new CommandManager
@@ -88,11 +115,10 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
             }
 
             } else {
-            if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID()))) {
+            if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())))
                 return;
-            }
             //Send message to Minecraft chat
-            API.sendMessage("[" + event.getMember().getUser().getName() + "] " + content, false, false, true);
+            API.sendMessage("[" + Objects.requireNonNull(event.getMember()).getUser().getName() + "] " + content, false, false, true);
         }
     }
 }

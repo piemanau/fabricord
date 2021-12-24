@@ -27,7 +27,7 @@ import java.util.*;
 
 @Environment(EnvType.SERVER)
 public class ServerInitializer implements DedicatedServerModInitializer, UpdateConfigsInterface {
-
+    
     public static Config config;
     public static boolean jdaReady = false;
     static JDA api;
