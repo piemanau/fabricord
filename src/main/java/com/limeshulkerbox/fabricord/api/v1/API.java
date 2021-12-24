@@ -160,6 +160,10 @@ public class API {
         }
     }
 
+    /**
+     * @return
+     * This returns the server uptime.
+     */
     public static Timer getUpTime() {
         return upTime;
     }

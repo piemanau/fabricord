@@ -27,7 +27,7 @@ import java.util.*;
 
 @Environment(EnvType.SERVER)
 public class ServerInitializer implements DedicatedServerModInitializer, UpdateConfigsInterface {
-    
+
     public static Config config;
     public static boolean jdaReady = false;
     static JDA api;
@@ -56,6 +56,7 @@ public class ServerInitializer implements DedicatedServerModInitializer, UpdateC
             e.printStackTrace();
             config = new Config("",
                     "",
+                    5000,
                     false,
                     "",
                     true,
@@ -93,6 +94,7 @@ public class ServerInitializer implements DedicatedServerModInitializer, UpdateC
                                 {
                                     "botToken": "",
                                     "commandsAccessRoleID": "",
+                                    "updateBotStatusEvery": "5000",
                                     
                                     "chatEnabled": "false",
                                     "chatChannelID": "",
@@ -143,10 +145,10 @@ public class ServerInitializer implements DedicatedServerModInitializer, UpdateC
             ctx.updateLoggers();
 
             //Register prompt events
-            ServerLifecycleEvents.SERVER_STARTING.register(new GetServerStartingEvent());
-            ServerLifecycleEvents.SERVER_STARTED.register(new GetServerStartedEvent());
-            ServerLifecycleEvents.SERVER_STOPPING.register(new GetServerStoppingEvent());
-            ServerLifecycleEvents.SERVER_STOPPED.register(new GetServerStoppedEvent());
+            ServerLifecycleEvents.SERVER_STARTING.register(new GetServerPromptEvents.GetServerStartingEvent());
+            ServerLifecycleEvents.SERVER_STARTED.register(new GetServerPromptEvents.GetServerStartedEvent());
+            ServerLifecycleEvents.SERVER_STOPPING.register(new GetServerPromptEvents.GetServerStoppingEvent());
+            ServerLifecycleEvents.SERVER_STOPPED.register(new GetServerPromptEvents.GetServerStoppedEvent());
         }
     }
 }

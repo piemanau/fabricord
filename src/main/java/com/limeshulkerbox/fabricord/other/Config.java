@@ -4,28 +4,35 @@ public class Config {
 
     private String botToken;
     private String commandsAccessRoleID;
+    private int updateBotStatusEvery;
+
     private boolean chatEnabled;
-    private boolean commandsInChatChannel;
     private String chatChannelID;
+    private boolean commandsInChatChannel;
+    private boolean promptsEnabled;
+
     private boolean consoleEnabled;
     private String consoleChannelID;
-    private boolean promptsEnabled;
-    private String serverStartingPrompt;
-    private String serverStartedPrompt;
-    private String serverStoppingPrompt;
-    private String serverStoppedPrompt;
     private boolean showDebugLogsInConsole;
     private boolean showErrorLogsInConsole;
     private boolean showWarnLogsInConsole;
     private boolean showInfoLogsInConsole;
-    private String webhookURL;
+
     private boolean webhooksEnabled;
+    private String webhookURL;
+
+    private String serverStartingPrompt;
+    private String serverStartedPrompt;
+    private String serverStoppingPrompt;
+    private String serverStoppedPrompt;
+
     private String[] keysToSendToDiscord;
     private String[] commandsForEveryone;
 
-    public Config(String botToken, String commandsAccessRoleID, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone) {
+    public Config(String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone) {
         this.botToken = botToken;
         this.commandsAccessRoleID = commandsAccessRoleID;
+        this.updateBotStatusEvery = updateBotStatusEvery;
 
         this.chatEnabled = chatEnabled;
         this.chatChannelID = chatChannelID;
@@ -209,5 +216,13 @@ public class Config {
 
     public void setKeysToSendToDiscord(String[] keysToSendToDiscord) {
         this.keysToSendToDiscord = keysToSendToDiscord;
+    }
+
+    public int getUpdateBotStatusEvery() {
+        return updateBotStatusEvery;
+    }
+
+    public void setUpdateBotStatusEvery(int updateBotStatusEvery) {
+        this.updateBotStatusEvery = updateBotStatusEvery;
     }
 }

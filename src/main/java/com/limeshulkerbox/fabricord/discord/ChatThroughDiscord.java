@@ -16,30 +16,12 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Timer;
 
 public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigsInterface {
 
     static String content;
 
     public ChatThroughDiscord() {
-    }
-
-    //Prompts
-    public static void serverStartingMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStartingPrompt(), false, true, false);
-    }
-
-    public static void serverStartedMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStartedPrompt(), false,true, false);
-    }
-
-    public static void serverStoppingMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStoppingPrompt(), false, true, false);
-    }
-
-    public static void serverStoppedMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStoppedPrompt(), false, true, false);
     }
 
     @Override
@@ -59,16 +41,10 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
 
         if (content.startsWith("/")) {
             //Checks if the user has the appropriate role
-            if (!Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(ServerInitializer.config.getCommandsAccessRoleID()))) {
-                event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> you don't have access to the console. If you believe you should have access, contact an Admin of this discord server.").queue();
-                return;
-            }
+            if (!checkPriveledges(event)) return;
 
             //Check correct channel
-            if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())) && ServerInitializer.config.getCommandsInChatChannel()) {
-                event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").queue();
-                return;
-            }
+            if (!checkChannel(event)) return;
 
             //Updates the config if /updateconfigs is run
             //TODO: change /updateconfigs to a discord / command
@@ -92,6 +68,7 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
                 formattedString.append(API.getServerVariable().getMaxPlayerCount());
                 formattedString.append(" players.");
                 API.sendMessageToDiscord(formattedString.toString(), event.getChannel());
+                return;
             } else if (content.toLowerCase(Locale.ROOT).equals("/tps")) {
                 Spark spark = SparkProvider.get();
                 if (spark == null) return;
@@ -103,6 +80,7 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
                 return;
             } else if (content.toLowerCase(Locale.ROOT).equals("/uptime")) {
                 API.sendMessageToDiscord(API.getUpTime().toString(), event.getChannel());
+                return;
             }
 
             //Register a new CommandManager
@@ -120,5 +98,38 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
             //Send message to Minecraft chat
             API.sendMessage("[" + Objects.requireNonNull(event.getMember()).getUser().getName() + "] " + content, false, false, true);
         }
+    }
+
+    private static boolean checkPriveledges(MessageReceivedEvent event) {
+        if (!Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(ServerInitializer.config.getCommandsAccessRoleID()))) {
+            event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> you don't have access to the console. If you believe you should have access, contact an Admin of this discord server.").queue();
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean checkChannel(MessageReceivedEvent event) {
+        if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())) && ServerInitializer.config.getCommandsInChatChannel()) {
+            event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").queue();
+            return false;
+        }
+        return true;
+    }
+
+    //Prompts
+    public static void serverStartingMethod() {
+        API.sendMessage(ServerInitializer.config.getServerStartingPrompt(), false, true, false);
+    }
+
+    public static void serverStartedMethod() {
+        API.sendMessage(ServerInitializer.config.getServerStartedPrompt(), false,true, false);
+    }
+
+    public static void serverStoppingMethod() {
+        API.sendMessage(ServerInitializer.config.getServerStoppingPrompt(), false, true, false);
+    }
+
+    public static void serverStoppedMethod() {
+        API.sendMessage(ServerInitializer.config.getServerStoppedPrompt(), false, true, false);
     }
 }

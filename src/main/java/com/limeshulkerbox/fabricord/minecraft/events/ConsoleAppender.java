@@ -12,7 +12,7 @@ import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.config;
 public class ConsoleAppender extends AbstractAppender {
 
     public ConsoleAppender() {
-        super("CustomConsoleAppender", null, null, false, Property.EMPTY_ARRAY);
+        super("FabricordConsoleAppender", null, null, false, Property.EMPTY_ARRAY);
     }
 
     @Override
