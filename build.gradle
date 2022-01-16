@@ -38,6 +38,7 @@ dependencies {
 	include implementation('com.fasterxml.jackson.core:jackson-databind:2.13.1')
 	include implementation('com.fasterxml.jackson.core:jackson-core:2.13.1')
 	include implementation('com.fasterxml.jackson.core:jackson-annotations:2.13.1')
+	include implementation("blue.endless:jankson:1.2.0")
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -46,6 +47,13 @@ dependencies {
 		exclude module: 'opus-java'
 	}
 	compileOnly 'me.lucko:spark-api:0.1-SNAPSHOT'
+
+	//lombok, used for getters and setters
+	compileOnly 'org.projectlombok:lombok:1.18.22'
+	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+	testCompileOnly 'org.projectlombok:lombok:1.18.22'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
 
 processResources {

@@ -20,7 +20,7 @@ public class GetServerPromptEvents {
     public static class GetServerStartingEvent implements ServerLifecycleEvents.ServerStarting {
         @Override
         public void onServerStarting(MinecraftServer server) {
-            if (ServerInitializer.config.getPromptsEnabled()) {
+            if (ServerInitializer.config.isPromptsEnabled()) {
                 serverStartingMethod();
             }
         }
@@ -33,7 +33,7 @@ public class GetServerPromptEvents {
         @Override
         public void onServerStarted(MinecraftServer server) {
             API.getUpTime().start();
-            if (ServerInitializer.config.getPromptsEnabled()) {
+            if (ServerInitializer.config.isPromptsEnabled()) {
                 serverStartedMethod();
             }
             startTime = new Date();
@@ -77,7 +77,7 @@ public class GetServerPromptEvents {
     public static class GetServerStoppingEvent implements ServerLifecycleEvents.ServerStopping {
         @Override
         public void onServerStopping(MinecraftServer server) {
-            if (ServerInitializer.config.getPromptsEnabled()) {
+            if (ServerInitializer.config.isPromptsEnabled()) {
                 serverStoppingMethod();
             }
         }
@@ -88,7 +88,7 @@ public class GetServerPromptEvents {
         public void onServerStopped(MinecraftServer server) {
             thread.interrupt();
             ServerInitializer.stopDiscordBot();
-            if (ServerInitializer.config.getPromptsEnabled()) {
+            if (ServerInitializer.config.isPromptsEnabled()) {
                 serverStoppedMethod();
             }
         }

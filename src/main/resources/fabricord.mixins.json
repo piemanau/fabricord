@@ -4,9 +4,7 @@
   "package": "com.limeshulkerbox.fabricord.minecraft.mixins",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-
     "GetServerMixin",
-    "PlayerManagerMixin",
     "ServerPlayerEntityMixin"
   ],
   "injectors": {

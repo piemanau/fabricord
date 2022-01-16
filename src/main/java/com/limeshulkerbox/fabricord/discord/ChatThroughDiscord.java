@@ -8,6 +8,7 @@ import me.lucko.spark.api.statistic.StatisticWindow;
 import me.lucko.spark.api.statistic.types.DoubleStatistic;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.minecraft.server.command.CommandManager;
@@ -19,11 +20,12 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import javax.security.auth.login.LoginException;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigsInterface {
+public class ChatThroughDiscord extends ListenerAdapter {
 
     static String content;
 
@@ -55,25 +57,11 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
                 //Updates the config if /updateconfigs is run
                 //TODO: change /updateconfigs to a discord / command
                 if (content.toLowerCase(Locale.ROOT).equals("/updateconfigs")) {
-                    updateConfigs();
+                    ServerInitializer.updateConfigs();
                     API.sendMessageToDiscord("Configs updated!", event.getChannel());
                     return;
                 } else if (content.toLowerCase(Locale.ROOT).equals("/list")) {
-                    String[] playerNames = API.getServerVariable().getPlayerManager().getPlayerNames();
-                    StringBuilder formattedString = new StringBuilder("");
-                    if (API.getServerVariable().getCurrentPlayerCount() != 0) {
-                        formattedString.append("Players online are: ");
-                        for (int i = 0; i < playerNames.length - 1; i++) {
-                            formattedString.append(playerNames[i]).append(":").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getDimension()).append(", ");
-                        }
-                        formattedString.append(playerNames[playerNames.length - 1]).append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getDimension());
-                    }
-                    formattedString.append("\nThere are ");
-                    formattedString.append(API.getServerVariable().getCurrentPlayerCount());
-                    formattedString.append(" players out of ");
-                    formattedString.append(API.getServerVariable().getMaxPlayerCount());
-                    formattedString.append(" players.");
-                    API.sendMessageToDiscord(formattedString.toString(), event.getChannel());
+                    API.sendMessageToDiscord(getList(), event.getChannel());
                     return;
                 } else if (content.toLowerCase(Locale.ROOT).equals("/tps")) {
                     Spark spark = SparkProvider.get();
@@ -82,7 +70,7 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
                     assert tps != null;
                     double tpsLast10Secs = tps.poll(StatisticWindow.TicksPerSecond.SECONDS_10);
                     double tpsLast5Mins = tps.poll(StatisticWindow.TicksPerSecond.MINUTES_5);
-                    API.sendMessageToDiscord("The tps from the last 10 seconds: " + ((int) tpsLast10Secs) + "\nThe tps from the last 5 minutes: " + ((int) tpsLast5Mins), event.getChannel());
+                    API.sendMessageToDiscord(getTps(), event.getChannel());
                     return;
                 } else if (content.toLowerCase(Locale.ROOT).equals("/uptime")) {
                     API.sendMessageToDiscord(API.getUpTime().toString(), event.getChannel());
@@ -90,10 +78,10 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
                 }
                 runCommand(event);
             }
-                if (API.checkIfSomethingIsPresent(ServerInitializer.config.getCommandsForEveryone(), String.valueOf(event.getMessage()))) {
+            if (API.checkIfSomethingIsPresent(ServerInitializer.config.getCommandsForEveryone(), String.valueOf(event.getMessage()))) {
                 runCommand(event);
             }
-            } else {
+        } else {
             if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())))
                 return;
             //Send message to Minecraft chat
@@ -110,7 +98,7 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
     }
 
     private static boolean checkChannel(MessageReceivedEvent event) {
-        if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())) && ServerInitializer.config.getCommandsInChatChannel() || !event.getChannel().equals(ServerInitializer.config.getConsoleChannelID())) {
+        if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())) && ServerInitializer.config.isCommandsInChatChannel() || !event.getChannel().equals(ServerInitializer.config.getConsoleChannelID())) {
             event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").queue();
             return false;
         }
@@ -123,7 +111,7 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
     }
 
     public static void serverStartedMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStartedPrompt(), false,true, false);
+        API.sendMessage(ServerInitializer.config.getServerStartedPrompt(), false, true, false);
     }
 
     public static void serverStoppingMethod() {
@@ -166,5 +154,58 @@ public class ChatThroughDiscord extends ListenerAdapter implements UpdateConfigs
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void registerDiscordCommands() throws LoginException {
+        //ServerInitializer.getDiscordApi().upsertCommand("updateconfigs", "Updates the configs for the MC server.").queue();
+        //ServerInitializer.getDiscordApi().upsertCommand("list", "Shows who is on the MC server.").queue();
+        //ServerInitializer.getDiscordApi().upsertCommand("tps", "Shows the TPS of the server.").queue();
+        //ServerInitializer.getDiscordApi().upsertCommand("uptime", "Shows how long the server has been up for.").queue();
+    }
+
+    @Override
+    public void onSlashCommand(SlashCommandEvent event) {
+        if (!event.getName().equals("updateconfigs")) {
+            ServerInitializer.updateConfigs();
+            event.reply("The config has been updated successfully!").setEphemeral(true).queue(); // Queue both reply and edit
+        }
+        if (!event.getName().equals("list")) {
+            event.reply(getList()).setEphemeral(true).queue();
+        }
+        if (!event.getName().equals("tps")) {
+            event.reply(getTps()).setEphemeral(true).queue(); // Queue both reply and edit
+        }
+        if (!event.getName().equals("uptime")) {
+            event.reply(API.getUpTime().toString()).setEphemeral(true).queue(); // Queue both reply and edit
+        }
+    }
+
+    private String getList() {
+        String[] playerNames = API.getServerVariable().getPlayerManager().getPlayerNames();
+        StringBuilder formattedString = new StringBuilder("");
+        if (API.getServerVariable().getCurrentPlayerCount() != 0) {
+            formattedString.append("Players online are: ");
+            for (int i = 0; i < playerNames.length - 1; i++) {
+                formattedString.append(playerNames[i]).append(":").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getDimension()).append(", ");
+            }
+            formattedString.append(playerNames[playerNames.length - 1]).append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getDimension());
+        }
+        formattedString.append("\nThere are ");
+        formattedString.append(API.getServerVariable().getCurrentPlayerCount());
+        formattedString.append(" players out of ");
+        formattedString.append(API.getServerVariable().getMaxPlayerCount());
+        formattedString.append(" players.");
+        return formattedString.toString();
+    }
+
+    private String getTps() {
+        Spark spark = SparkProvider.get();
+        if (spark != null) {
+            DoubleStatistic<StatisticWindow.TicksPerSecond> tps = spark.tps();
+            assert tps != null;
+            double tpsLast10Secs = tps.poll(StatisticWindow.TicksPerSecond.SECONDS_10);
+            double tpsLast5Mins = tps.poll(StatisticWindow.TicksPerSecond.MINUTES_5);
+            return "The tps from the last 10 seconds: " + ((int) tpsLast10Secs) + "\nThe tps from the last 5 minutes: " + ((int) tpsLast5Mins);
+        } return "";
     }
 }

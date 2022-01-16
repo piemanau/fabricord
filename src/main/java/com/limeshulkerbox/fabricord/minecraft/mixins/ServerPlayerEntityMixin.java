@@ -40,10 +40,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
                 key = translatableText.getKey();
             }
             if (API.checkIfSomethingIsPresent(config.getKeysToSendToDiscord(), key) && sender.equals(getUuid())) {
-                if (!config.getOnlyWebhooks()) {
-                    if (config.getChatEnabled()) {
+                if (!config.isOnlyWebhooks()) {
+                    if (config.isChatEnabled()) {
                         API.sendMessageToDiscordChat(message.getString());
-                    } else if (config.getWebhooksEnabled()) {
+                    } else if (config.isWebhooksEnabled()) {
                         String message1 = message.getString();
                         API.sendMessageToDiscordWebhook(message1.replaceFirst("<.+?> ", ""), UUIDConverter.getName(sender), "https://crafatar.com/avatars/" + sender + "?&overlay", config.getWebhookURL());
                     }

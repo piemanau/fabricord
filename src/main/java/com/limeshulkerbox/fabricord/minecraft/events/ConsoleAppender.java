@@ -19,13 +19,13 @@ public class ConsoleAppender extends AbstractAppender {
     public void append(LogEvent event) {
         if (ServerInitializer.jdaReady) {
             //Checking if it is at the right level
-            if (event.getLevel() == Level.ERROR && config.getShowErrorLogsInConsole()) {
+            if (event.getLevel() == Level.ERROR && config.isShowErrorLogsInConsole()) {
                 API.sendMessage("[" + event.getLevel() + "] " + event.getMessage().getFormattedMessage(), true, false, false);
-            } else if (event.getLevel() == Level.INFO && config.getShowInfoLogsInConsole()) {
+            } else if (event.getLevel() == Level.INFO && config.isShowInfoLogsInConsole()) {
                 API.sendMessage("[" + event.getLevel() + "] " + event.getMessage().getFormattedMessage(), true, false, false);
-            } else if (event.getLevel() == Level.WARN && config.getShowWarnLogsInConsole()) {
+            } else if (event.getLevel() == Level.WARN && config.isShowWarnLogsInConsole()) {
                 API.sendMessage("[" + event.getLevel() + "] " + event.getMessage().getFormattedMessage(), true, false, false);
-            } else if (event.getLevel() == Level.DEBUG && config.getShowDebugLogsInConsole()) {
+            } else if (event.getLevel() == Level.DEBUG && config.isShowDebugLogsInConsole()) {
                 API.sendMessage("[" + event.getLevel() + "] " + event.getMessage().getFormattedMessage(), true, false, false);
             }
         }

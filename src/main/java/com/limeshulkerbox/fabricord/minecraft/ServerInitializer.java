@@ -1,11 +1,7 @@
 package com.limeshulkerbox.fabricord.minecraft;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import blue.endless.jankson.Jankson;
 import com.limeshulkerbox.fabricord.discord.ChatThroughDiscord;
-import com.limeshulkerbox.fabricord.discord.UpdateConfigsCommand;
-import com.limeshulkerbox.fabricord.discord.UpdateConfigsInterface;
 import com.limeshulkerbox.fabricord.minecraft.events.*;
 import com.limeshulkerbox.fabricord.other.Config;
 import net.dv8tion.jda.api.JDA;
@@ -13,26 +9,55 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import javax.security.auth.login.LoginException;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static net.minecraft.server.command.CommandManager.literal;
+
 @Environment(EnvType.SERVER)
-public class ServerInitializer implements DedicatedServerModInitializer, UpdateConfigsInterface {
+public class ServerInitializer implements DedicatedServerModInitializer {
 
     public static Config config;
     public static boolean jdaReady = false;
     static JDA api;
-    static Path configPath = Paths.get(FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fabricord.json");
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    static String sConfigPath = FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fabricord.json";
+    static Path configPath = Paths.get(sConfigPath);
+    static BufferedWriter fileWriter;
+    static Config defaultConfig = new Config("Add bot token here",
+            "",
+            5000,
+            true,
+            "",
+            true,
+            true,
+            true,
+            "",
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            "Add webhook URL here",
+            "Server starting",
+            "Server started",
+            "Server stopping",
+            "Server stopped",
+            new String[]{""},
+            new String[]{"chat.type.text"});
+
+    public static final Jankson jankson = Jankson.builder().build();
     public static final UUID modUUID = UUID.fromString("0c4fc385-8b46-4ef2-8375-fcd19d71f45e");
     public static final int messageSplitterAmount = 2000;
 
@@ -47,12 +72,12 @@ public class ServerInitializer implements DedicatedServerModInitializer, UpdateC
     }
 
     //Method to grab stuff from the config file
-    @Override
-    public void updateConfigs() {
+    public static void updateConfigs() {
         try {
             String contents = Files.readString(configPath);
-            config = gson.fromJson(contents, Config.class);
-        } catch (IOException | JsonSyntaxException e) {
+            var json = jankson.load(contents);
+            config = jankson.fromJson(json, Config.class);
+        } catch (Exception e) {
             e.printStackTrace();
             config = new Config("",
                     "",
@@ -82,14 +107,16 @@ public class ServerInitializer implements DedicatedServerModInitializer, UpdateC
     @Override
     public void onInitializeServer() {
 
-        new UpdateConfigsCommand();
-
         //Create default config file
         try {
             if (!Files.exists(configPath)) {
                 if (!Files.exists(configPath.getParent())) {
                     Files.createDirectory(configPath.getParent());
                 }
+
+                var str = jankson.toJson(defaultConfig).toJson(true, true);
+                Files.writeString(configPath, str);
+
                 String contents =
                         """
                                 {
@@ -122,7 +149,7 @@ public class ServerInitializer implements DedicatedServerModInitializer, UpdateC
                                      "keysToSendToDiscord": ["chat.type.text"]
                                  }
                                         """;
-                Files.writeString(configPath, contents);
+                //Files.writeString(configPath, contents);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -130,6 +157,20 @@ public class ServerInitializer implements DedicatedServerModInitializer, UpdateC
 
         //Get the configs from the json
         updateConfigs();
+
+        //Update configs command in MC
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+            dispatcher.register(literal("updateconfigs").executes(context -> {
+                updateConfigs();
+                return 1;
+            }));
+        });
+
+        try {
+            ChatThroughDiscord.registerDiscordCommands();
+        } catch (LoginException e) {
+            e.printStackTrace();
+        }
 
         if (!config.getBotToken().equals("")) {
             //Make the Discord bot come alive

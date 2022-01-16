@@ -1,33 +1,85 @@
 package com.limeshulkerbox.fabricord.other;
 
+import blue.endless.jankson.annotation.SerializedName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+@Data
+//@ToString
+//@EqualsAndHashCode
 public class Config {
 
+    @SerializedName("bot_token")
     private String botToken;
+
+    @SerializedName("commands_access_roles_id")
     private String commandsAccessRoleID;
+
+    @SerializedName("update_bot_status_every")
     private int updateBotStatusEvery;
 
+
+    @SerializedName("chat_enabled")
     private boolean chatEnabled;
+
+    @SerializedName("chat_channel_id")
     private String chatChannelID;
+
+    @SerializedName("commands_in_chat_channel")
     private boolean commandsInChatChannel;
+
+    @SerializedName("prompt_enabled")
     private boolean promptsEnabled;
 
+
+    @SerializedName("console_enabled")
     private boolean consoleEnabled;
+
+    @SerializedName("console_channel_id")
     private String consoleChannelID;
+
+    @SerializedName("show_debug_logs_in_console")
     private boolean showDebugLogsInConsole;
+
+    @SerializedName("show_error_logs_in_console")
     private boolean showErrorLogsInConsole;
+
+    @SerializedName("show_warn_logs_in_console")
     private boolean showWarnLogsInConsole;
+
+    @SerializedName("show_info_logs_in_console")
     private boolean showInfoLogsInConsole;
 
+
+    @SerializedName("webhooks_enabled")
     private boolean webhooksEnabled;
+
+    @SerializedName("only_webhooks")
     private boolean onlyWebhooks;
+
+    @SerializedName("webhook_url")
     private String webhookURL;
 
+
+    @SerializedName("server_starting_prompt")
     private String serverStartingPrompt;
+
+    @SerializedName("server_started_prompt")
     private String serverStartedPrompt;
+
+    @SerializedName("server_stopping_prompt")
     private String serverStoppingPrompt;
+
+    @SerializedName("server_stopped_prompt")
     private String serverStoppedPrompt;
 
+
+    @SerializedName("keys_to_send_to_discord")
     private String[] keysToSendToDiscord;
+
+    @SerializedName("commands_for_everyone")
     private String[] commandsForEveryone;
 
     public Config(String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, boolean onlyWebhooks, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone) {
@@ -60,179 +112,8 @@ public class Config {
         this.keysToSendToDiscord = keysToSendToDiscord;
     }
 
-    public String getBotToken() {
-        return botToken;
-    }
+    public Config()
+    {
 
-    public void setBotToken(String botToken) {
-        this.botToken = botToken;
-    }
-
-    public String getChatChannelID() {
-        return chatChannelID;
-    }
-
-    public void setChatChannelID(String chatChannelID) {
-        this.chatChannelID = chatChannelID;
-    }
-
-    public String getConsoleChannelID() {
-        return consoleChannelID;
-    }
-
-    public void setConsoleChannelID(String consoleChannelID) {
-        this.consoleChannelID = consoleChannelID;
-    }
-
-    public String getCommandsAccessRoleID() {
-        return commandsAccessRoleID;
-    }
-
-    public void setCommandsAccessRoleID(String commandsAccessRoleID) {
-        this.commandsAccessRoleID = commandsAccessRoleID;
-    }
-
-    public boolean getChatEnabled() {
-        return chatEnabled;
-    }
-
-    public void setChatEnabled(boolean chatEnabled) {
-        this.chatEnabled = chatEnabled;
-    }
-
-    public boolean getCommandsInChatChannel() {
-        return commandsInChatChannel;
-    }
-
-    public void setCommandsInChatChannel(boolean commandsInChatChannel) {
-        this.commandsInChatChannel = commandsInChatChannel;
-    }
-
-    public boolean getConsoleEnables() {
-        return consoleEnabled;
-    }
-
-    public void setConsoleEnabled(boolean consoleEnabled) {
-        this.consoleEnabled = consoleEnabled;
-    }
-
-    public boolean getPromptsEnabled() {
-        return promptsEnabled;
-    }
-
-    public void setPromptsEnabled(boolean promptsEnabled) {
-        this.promptsEnabled = promptsEnabled;
-    }
-
-    public String getServerStartingPrompt() {
-        return serverStartingPrompt;
-    }
-
-    public void setServerStartingPrompt(String serverStartingPrompt) {
-        this.serverStartingPrompt = serverStartingPrompt;
-    }
-
-    public String getServerStartedPrompt() {
-        return serverStartedPrompt;
-    }
-
-    public void setServerStartedPrompt(String serverStartedPrompt) {
-        this.serverStartedPrompt = serverStartedPrompt;
-    }
-
-    public String getServerStoppingPrompt() {
-        return serverStoppingPrompt;
-    }
-
-    public void setServerStoppingPrompt(String serverStoppingPrompt) {
-        this.serverStoppingPrompt = serverStoppingPrompt;
-    }
-
-    public String getServerStoppedPrompt() {
-        return serverStoppedPrompt;
-    }
-
-    public void setServerStoppedPrompt(String serverStoppedPrompt) {
-        this.serverStoppedPrompt = serverStoppedPrompt;
-    }
-
-    public boolean getShowDebugLogsInConsole() {
-        return showDebugLogsInConsole;
-    }
-
-    public void setShowDebugLogsInConsole(boolean showDebugLogsInConsole) {
-        this.showDebugLogsInConsole = showDebugLogsInConsole;
-    }
-
-    public boolean getShowErrorLogsInConsole() {
-        return showErrorLogsInConsole;
-    }
-
-    public void setShowErrorLogsInConsole(boolean showErrorLogsInConsole) {
-        this.showErrorLogsInConsole = showErrorLogsInConsole;
-    }
-
-    public boolean getShowWarnLogsInConsole() {
-        return showWarnLogsInConsole;
-    }
-
-    public void setShowWarnLogsInConsole(boolean showWarnLogsInConsole) {
-        this.showWarnLogsInConsole = showWarnLogsInConsole;
-    }
-
-    public boolean getShowInfoLogsInConsole() {
-        return showInfoLogsInConsole;
-    }
-
-    public void setShowInfoLogsInConsole(boolean showInfoLogsInConsole) {
-        this.showInfoLogsInConsole = showInfoLogsInConsole;
-    }
-
-    public String getWebhookURL() {
-        return webhookURL;
-    }
-
-    public void setWebhookURL(String webhookURL) {
-        this.webhookURL = webhookURL;
-    }
-
-    public boolean getWebhooksEnabled() {
-        return webhooksEnabled;
-    }
-
-    public void setWebhooksEnabled(boolean webhooksEnabled) {
-        this.webhooksEnabled = webhooksEnabled;
-    }
-
-    public String[] getCommandsForEveryone() {
-        return commandsForEveryone;
-    }
-
-    public void setCommandsForEveryone(String[] commandsForEveryone) {
-        this.commandsForEveryone = commandsForEveryone;
-    }
-
-    public String[] getKeysToSendToDiscord() {
-        return keysToSendToDiscord;
-    }
-
-    public void setKeysToSendToDiscord(String[] keysToSendToDiscord) {
-        this.keysToSendToDiscord = keysToSendToDiscord;
-    }
-
-    public int getUpdateBotStatusEvery() {
-        return updateBotStatusEvery;
-    }
-
-    public void setUpdateBotStatusEvery(int updateBotStatusEvery) {
-        this.updateBotStatusEvery = updateBotStatusEvery;
-    }
-
-    public boolean getOnlyWebhooks() {
-        return onlyWebhooks;
-    }
-
-    public void setOnlyWebhooks(boolean onlyWebhooks) {
-        this.onlyWebhooks = onlyWebhooks;
     }
 }
