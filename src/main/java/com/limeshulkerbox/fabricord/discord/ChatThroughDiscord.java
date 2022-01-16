@@ -49,35 +49,36 @@ public class ChatThroughDiscord extends ListenerAdapter {
 
         if (content.startsWith("/")) {
             //Check correct channel
-            if (!checkChannel(event)) return;
+            if (!(event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())) && ServerInitializer.config.isCommandsInChatChannel() || event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getConsoleChannelID())))) {
+                event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").queue();
+                return;
+            }
+
+            if (!Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(ServerInitializer.config.getCommandsAccessRoleID()))) {
+                event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> you don't have access to the console. If you believe you should have access, contact an Admin of this discord server.").queue();
+                return;
+            }
 
             //Checks if the user has the appropriate role
-            if (checkPriveledges(event)) {
 
-                //Updates the config if /updateconfigs is run
-                //TODO: change /updateconfigs to a discord / command
-                if (content.toLowerCase(Locale.ROOT).equals("/updateconfigs")) {
-                    ServerInitializer.updateConfigs();
-                    API.sendMessageToDiscord("Configs updated!", event.getChannel());
-                    return;
-                } else if (content.toLowerCase(Locale.ROOT).equals("/list")) {
-                    API.sendMessageToDiscord(getList(), event.getChannel());
-                    return;
-                } else if (content.toLowerCase(Locale.ROOT).equals("/tps")) {
-                    Spark spark = SparkProvider.get();
-                    if (spark == null) return;
-                    DoubleStatistic<StatisticWindow.TicksPerSecond> tps = spark.tps();
-                    assert tps != null;
-                    double tpsLast10Secs = tps.poll(StatisticWindow.TicksPerSecond.SECONDS_10);
-                    double tpsLast5Mins = tps.poll(StatisticWindow.TicksPerSecond.MINUTES_5);
-                    API.sendMessageToDiscord(getTps(), event.getChannel());
-                    return;
-                } else if (content.toLowerCase(Locale.ROOT).equals("/uptime")) {
-                    API.sendMessageToDiscord(API.getUpTime().toString(), event.getChannel());
-                    return;
-                }
-                runCommand(event);
+            //Updates the config if /updateconfigs is run
+            //TODO: change /updateconfigs to a discord / command
+            if (content.toLowerCase(Locale.ROOT).equals("/updateconfigs")) {
+                ServerInitializer.updateConfigs();
+                API.sendMessageToDiscord("Configs updated!", event.getChannel());
+                return;
+            } else if (content.toLowerCase(Locale.ROOT).equals("/list")) {
+                API.sendMessageToDiscord(getList(), event.getChannel());
+                return;
+            } else if (content.toLowerCase(Locale.ROOT).equals("/tps")) {
+                API.sendMessageToDiscord(getTps(), event.getChannel());
+                return;
+            } else if (content.toLowerCase(Locale.ROOT).equals("/uptime")) {
+                API.sendMessageToDiscord(API.getUpTime().toString(), event.getChannel());
+                return;
             }
+            runCommand(event);
+
             if (API.checkIfSomethingIsPresent(ServerInitializer.config.getCommandsForEveryone(), String.valueOf(event.getMessage()))) {
                 runCommand(event);
             }
@@ -87,22 +88,6 @@ public class ChatThroughDiscord extends ListenerAdapter {
             //Send message to Minecraft chat
             API.sendMessage("[" + Objects.requireNonNull(event.getMember()).getUser().getName() + "] " + content, false, false, true);
         }
-    }
-
-    private static boolean checkPriveledges(MessageReceivedEvent event) {
-        if (!Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(ServerInitializer.config.getCommandsAccessRoleID()))) {
-            event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> you don't have access to the console. If you believe you should have access, contact an Admin of this discord server.").queue();
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean checkChannel(MessageReceivedEvent event) {
-        if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())) && ServerInitializer.config.isCommandsInChatChannel() || !event.getChannel().equals(ServerInitializer.config.getConsoleChannelID())) {
-            event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").queue();
-            return false;
-        }
-        return true;
     }
 
     //Prompts
@@ -206,6 +191,7 @@ public class ChatThroughDiscord extends ListenerAdapter {
             double tpsLast10Secs = tps.poll(StatisticWindow.TicksPerSecond.SECONDS_10);
             double tpsLast5Mins = tps.poll(StatisticWindow.TicksPerSecond.MINUTES_5);
             return "The tps from the last 10 seconds: " + ((int) tpsLast10Secs) + "\nThe tps from the last 5 minutes: " + ((int) tpsLast5Mins);
-        } return "";
+        }
+        return "";
     }
 }

@@ -82,7 +82,10 @@ public class Config {
     @SerializedName("commands_for_everyone")
     private String[] commandsForEveryone;
 
-    public Config(String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, boolean onlyWebhooks, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone) {
+    @SerializedName("send_other_keys_to_discord")
+    private boolean sendOtherKeysToDiscord;
+
+    public Config(String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, boolean onlyWebhooks, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone, boolean sendOtherKeysToDiscord) {
         this.botToken = botToken;
         this.commandsAccessRoleID = commandsAccessRoleID;
         this.updateBotStatusEvery = updateBotStatusEvery;
@@ -110,6 +113,8 @@ public class Config {
 
         this.commandsForEveryone = commandsForEveryone;
         this.keysToSendToDiscord = keysToSendToDiscord;
+
+        this.sendOtherKeysToDiscord = sendOtherKeysToDiscord;
     }
 
     public Config()

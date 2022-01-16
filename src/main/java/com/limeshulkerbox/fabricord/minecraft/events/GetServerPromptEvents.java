@@ -87,10 +87,10 @@ public class GetServerPromptEvents {
         @Override
         public void onServerStopped(MinecraftServer server) {
             thread.interrupt();
-            ServerInitializer.stopDiscordBot();
             if (ServerInitializer.config.isPromptsEnabled()) {
                 serverStoppedMethod();
             }
+            ServerInitializer.stopDiscordBot();
         }
     }
 }

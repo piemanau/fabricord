@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -54,8 +55,9 @@ public class ServerInitializer implements DedicatedServerModInitializer {
             "Server started",
             "Server stopping",
             "Server stopped",
+            new String[]{"multiplayer.player.joined", "multiplayer.player.joined.renamed", "multiplayer.player.left", "chat.type.text"},
             new String[]{""},
-            new String[]{"chat.type.text"});
+            false);
 
     public static final Jankson jankson = Jankson.builder().build();
     public static final UUID modUUID = UUID.fromString("0c4fc385-8b46-4ef2-8375-fcd19d71f45e");
@@ -100,7 +102,8 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                     "Server stopping",
                     "Server stopped",
                     new String[0],
-                    new String[0]);
+                    new String[0],
+                    false);
         }
     }
 
@@ -114,42 +117,8 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                     Files.createDirectory(configPath.getParent());
                 }
 
-                var str = jankson.toJson(defaultConfig).toJson(true, true);
+                String str = jankson.toJson(defaultConfig).toJson(true, true);
                 Files.writeString(configPath, str);
-
-                String contents =
-                        """
-                                {
-                                     "botToken": "",
-                                     "commandsAccessRoleID": "",
-                                     "updateBotStatusEvery": "5000",
-                                 
-                                     "chatEnabled": "true",
-                                     "chatChannelID": "",
-                                     "commandsInChatChannel": "true",
-                                     "promptsEnabled": "true",
-                                 
-                                     "consoleEnabled": "true",
-                                     "consoleChannelID": "",
-                                     "showInfoLogsInConsole": "true",
-                                     "showWarnLogsInConsole": "true",
-                                     "showErrorLogsInConsole": "true",
-                                     "showDebugLogsInConsole": "false",
-                                 
-                                     "webhooksEnabled": "true",
-                                     "onlyWebhooks": "true",
-                                     "webhookURL": "",
-                                 
-                                     "serverStartingPrompt": "Server starting",
-                                     "serverStartedPrompt": "Server started",
-                                     "serverStoppingPrompt": "Server stopping",
-                                     "serverStoppedPrompt": "Server stopped",
-                                 
-                                     "commandsForEveryone": [""],
-                                     "keysToSendToDiscord": ["chat.type.text"]
-                                 }
-                                        """;
-                //Files.writeString(configPath, contents);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -162,6 +131,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
             dispatcher.register(literal("updateconfigs").executes(context -> {
                 updateConfigs();
+                context.getSource().sendFeedback(Text.of("Successfully updated the configs!"), true);
                 return 1;
             }));
         });

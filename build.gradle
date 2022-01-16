@@ -39,6 +39,7 @@ dependencies {
 	include implementation('com.fasterxml.jackson.core:jackson-core:2.13.1')
 	include implementation('com.fasterxml.jackson.core:jackson-annotations:2.13.1')
 	include implementation("blue.endless:jankson:1.2.0")
+	include implementation("org.json:json:20210307")
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"

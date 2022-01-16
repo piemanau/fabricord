@@ -3,44 +3,29 @@ package com.limeshulkerbox.fabricord.minecraft.mixins;
 import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
 import com.limeshulkerbox.fabricord.other.UUIDConverter;
-import com.mojang.authlib.GameProfile;
-import me.lucko.spark.api.Spark;
-import me.lucko.spark.api.SparkProvider;
-import me.lucko.spark.api.statistic.StatisticWindow;
-import me.lucko.spark.api.statistic.types.DoubleStatistic;
-import net.dv8tion.jda.api.entities.Activity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.MessageType;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.IOException;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.config;
 
-@Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntity {
+@Mixin(PlayerManager.class)
+public abstract class PlayerManagerMixin {
 
-    @Shadow
-    public abstract boolean shouldDamagePlayer(PlayerEntity player);
+    Thread thread;
 
-    public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
-        super(world, pos, yaw, profile);
-    }
-
-    private static Thread thread;
-
-    @Inject(method = "sendMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V", at = @At(value = "TAIL"))
+    @Inject(method = "broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V", at = @At(value = "TAIL"))
     public void getMessage(Text message, MessageType type, UUID sender, CallbackInfo ci) throws IOException {
         thread = new Thread(() ->
         {
@@ -50,7 +35,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
                     if (message instanceof TranslatableText translatableText) {
                         key = translatableText.getKey();
                     }
-                    if (API.checkIfSomethingIsPresent(config.getKeysToSendToDiscord(), key) && sender.equals(getUuid())) {
+                    if (API.checkIfSomethingIsPresent(config.getKeysToSendToDiscord(), key)) {
                         if (!config.isOnlyWebhooks()) {
                             if (config.isChatEnabled()) {
                                 API.sendMessageToDiscordChat(message.getString());
@@ -58,13 +43,25 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
                             }
                             if (config.isWebhooksEnabled()) {
                                 String message1 = message.getString();
-                                API.sendMessageToDiscordWebhook(message1.replaceFirst("<.+?> ", ""), UUIDConverter.getName(sender), "https://crafatar.com/avatars/" + sender + "?&overlay", config.getWebhookURL());
+                                String[] message2 = message1.split(" ");
+                                String message4 = "";
+                                for (int i = 0; i < message2.length; i++) {
+                                    message4 += message2[i] + " ";
+                                }
+                                String message3 = message4.replaceFirst(message2[0], "");
+                                API.sendMessageToDiscordWebhook(message3, message2[0], "https://crafatar.com/avatars/" + UUIDConverter.getUUID(message2[0]) + "?&overlay", config.getWebhookURL());
                                 thread.interrupt();
                             }
                         } else {
                             if (config.isWebhooksEnabled()) {
                                 String message1 = message.getString();
-                                API.sendMessageToDiscordWebhook(message1.replaceFirst("<.+?> ", ""), UUIDConverter.getName(sender), "https://crafatar.com/avatars/" + sender + "?&overlay", config.getWebhookURL());
+                                String[] message2 = message1.split(" ");
+                                String message4 = "";
+                                for (int i = 0; i < message2.length; i++) {
+                                    message4 += message2[i] + " ";
+                                }
+                                String message3 = message4.replaceFirst(message2[0], "");
+                                API.sendMessageToDiscordWebhook(message3, message2[0], "https://crafatar.com/avatars/" + UUIDConverter.getUUID(message2[0]) + "?&overlay", config.getWebhookURL());
                                 thread.interrupt();
                             } else if (config.isChatEnabled()) {
                                 API.sendMessageToDiscordChat(message.getString());
@@ -72,8 +69,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
                             }
                         }
                     } else if (!key.equals("this.cannot.be.blank")) {
-                        System.out.println("The key: " + key + " is not present in the config. This message is from ServerPlayerEntityMixin from Fabricord.");
-                    }
+                        System.out.println("The key: " + key + " is not present in the config. This message is from PlayerManagerMixin from Fabricord.");
+                        }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
