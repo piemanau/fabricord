@@ -35,7 +35,8 @@ public class ServerInitializer implements DedicatedServerModInitializer {
     static String sConfigPath = FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fabricord.json";
     static Path configPath = Paths.get(sConfigPath);
     static BufferedWriter fileWriter;
-    static Config defaultConfig = new Config("Add bot token here",
+    static Config defaultConfig = new Config(1.0f,
+            "Add bot token here",
             "",
             5000,
             true,
@@ -81,7 +82,8 @@ public class ServerInitializer implements DedicatedServerModInitializer {
             config = jankson.fromJson(json, Config.class);
         } catch (Exception e) {
             e.printStackTrace();
-            config = new Config("",
+            config = new Config(1.0f,
+                    "",
                     "",
                     5000,
                     false,
@@ -110,8 +112,8 @@ public class ServerInitializer implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
 
-        //Create default config file
         try {
+            //Create default config file
             if (!Files.exists(configPath)) {
                 if (!Files.exists(configPath.getParent())) {
                     Files.createDirectory(configPath.getParent());
@@ -119,49 +121,43 @@ public class ServerInitializer implements DedicatedServerModInitializer {
 
                 String str = jankson.toJson(defaultConfig).toJson(true, true);
                 Files.writeString(configPath, str);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        //Get the configs from the json
-        updateConfigs();
 
-        //Update configs command in MC
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("updateconfigs").executes(context -> {
+                //Get the configs from the json
                 updateConfigs();
-                context.getSource().sendFeedback(Text.of("Successfully updated the configs!"), true);
-                return 1;
-            }));
-        });
 
-        try {
-            ChatThroughDiscord.registerDiscordCommands();
-        } catch (LoginException e) {
-            e.printStackTrace();
-        }
+                //Update configs command in MC
+                CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+                    dispatcher.register(literal("updateconfigs").executes(context -> {
+                        updateConfigs();
+                        context.getSource().sendFeedback(Text.of("Successfully updated the configs!"), true);
+                        return 1;
+                    }));
+                });
 
-        if (!config.getBotToken().equals("")) {
-            //Make the Discord bot come alive
-            try {
-                api = JDABuilder.createDefault(config.getBotToken()).addEventListeners(new ChatThroughDiscord()).build();
-            } catch (LoginException e) {
-                e.printStackTrace();
+                ChatThroughDiscord.registerDiscordCommands();
+
+                if (!config.getBotToken().equals("")) {
+                    //Make the Discord bot come alive
+                    api = JDABuilder.createDefault(config.getBotToken()).addEventListeners(new ChatThroughDiscord()).build();
+
+                    //Register and make appender
+                    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+                    ConsoleAppender consoleAppender = new ConsoleAppender();
+                    consoleAppender.start();
+                    ctx.getRootLogger().addAppender(consoleAppender);
+                    ctx.updateLoggers();
+
+                    //Register prompt events
+                    ServerLifecycleEvents.SERVER_STARTING.register(new GetServerPromptEvents.GetServerStartingEvent());
+                    ServerLifecycleEvents.SERVER_STARTED.register(new GetServerPromptEvents.GetServerStartedEvent());
+                    ServerLifecycleEvents.SERVER_STOPPING.register(new GetServerPromptEvents.GetServerStoppingEvent());
+                    ServerLifecycleEvents.SERVER_STOPPED.register(new GetServerPromptEvents.GetServerStoppedEvent());
+
+                }
             }
-
-            //Register and make appender
-            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-            ConsoleAppender consoleAppender = new ConsoleAppender();
-            consoleAppender.start();
-            ctx.getRootLogger().addAppender(consoleAppender);
-            ctx.updateLoggers();
-
-            //Register prompt events
-            ServerLifecycleEvents.SERVER_STARTING.register(new GetServerPromptEvents.GetServerStartingEvent());
-            ServerLifecycleEvents.SERVER_STARTED.register(new GetServerPromptEvents.GetServerStartedEvent());
-            ServerLifecycleEvents.SERVER_STOPPING.register(new GetServerPromptEvents.GetServerStoppingEvent());
-            ServerLifecycleEvents.SERVER_STOPPED.register(new GetServerPromptEvents.GetServerStoppedEvent());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

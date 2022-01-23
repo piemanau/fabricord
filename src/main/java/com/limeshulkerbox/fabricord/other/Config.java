@@ -11,6 +11,9 @@ import lombok.ToString;
 //@EqualsAndHashCode
 public class Config {
 
+    @SerializedName("config_version")
+    private float configVersion;
+
     @SerializedName("bot_token")
     private String botToken;
 
@@ -85,7 +88,9 @@ public class Config {
     @SerializedName("send_other_keys_to_discord")
     private boolean sendOtherKeysToDiscord;
 
-    public Config(String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, boolean onlyWebhooks, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone, boolean sendOtherKeysToDiscord) {
+    public Config(float configversion, String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, boolean onlyWebhooks, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone, boolean sendOtherKeysToDiscord) {
+        this.configVersion = configversion;
+
         this.botToken = botToken;
         this.commandsAccessRoleID = commandsAccessRoleID;
         this.updateBotStatusEvery = updateBotStatusEvery;

@@ -46,12 +46,12 @@ public class GetServerPromptEvents {
                         if (wait > 0) Thread.sleep(wait); //should blocking-wait
                         //do stuff
                         {
-                            Spark spark = SparkProvider.get();
-                            if (spark != null) {
-                                DoubleStatistic<StatisticWindow.TicksPerSecond> tps = spark.tps();
-                                assert tps != null;
-                                double tpsLast10Secs = tps.poll(StatisticWindow.TicksPerSecond.SECONDS_10);
-                                ServerInitializer.getDiscordApi().getPresence().setActivity(Activity.playing(String.format("Minecraft with %s other players! With a TPS of %.01f and uptime of %s.", API.getServerVariable().getCurrentPlayerCount() + "/" + API.getServerVariable().getMaxPlayerCount(), tpsLast10Secs, getUptime())));
+                            if (SparkProvider.get() != null) {
+                                Spark spark = SparkProvider.get();
+                                    DoubleStatistic<StatisticWindow.TicksPerSecond> tps = spark.tps();
+                                    assert tps != null;
+                                    double tpsLast10Secs = tps.poll(StatisticWindow.TicksPerSecond.SECONDS_10);
+                                    ServerInitializer.getDiscordApi().getPresence().setActivity(Activity.playing(String.format("Minecraft with %s other players! With a TPS of %.01f and uptime of %s.", API.getServerVariable().getCurrentPlayerCount() + "/" + API.getServerVariable().getMaxPlayerCount(), tpsLast10Secs, getUptime())));
                             }
                         }
                     }
