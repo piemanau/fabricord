@@ -3,14 +3,18 @@ package com.limeshulkerbox.fabricord.api.v1;
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.minecraft.network.MessageType;
+import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 import javax.management.timer.Timer;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -57,6 +61,17 @@ public class API {
             Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessage(message).queue();
         } else {
             splitToNChar(message, messageSplitterAmount, config.getChatChannelID());
+        }
+    }
+
+    /**
+     * This is the embed you want to send to the Discord version of the Minecraft chat, where messages go that are sent in-game.
+     * @param embed
+     * This is the embed you want to send.
+     */
+    public static void sendEmbedToDiscordChat(EmbedBuilder embed) {
+        if (embed.length() <= messageSplitterAmount) {
+            Objects.requireNonNull(Objects.requireNonNull(getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessageEmbeds(embed.build())).queue();
         }
     }
 

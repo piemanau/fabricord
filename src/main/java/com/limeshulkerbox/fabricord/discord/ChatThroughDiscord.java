@@ -6,6 +6,7 @@ import me.lucko.spark.api.Spark;
 import me.lucko.spark.api.SparkProvider;
 import me.lucko.spark.api.statistic.StatisticWindow;
 import me.lucko.spark.api.statistic.types.DoubleStatistic;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
@@ -21,9 +22,12 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.security.auth.login.LoginException;
+import java.awt.*;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
+
+import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.config;
 
 public class ChatThroughDiscord extends ListenerAdapter {
 
@@ -49,41 +53,38 @@ public class ChatThroughDiscord extends ListenerAdapter {
 
         if (content.startsWith("/")) {
             //Check correct channel
-            if (!(event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())) && ServerInitializer.config.isCommandsInChatChannel() || event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getConsoleChannelID())))) {
+            if (!(event.getChannel().equals(event.getGuild().getTextChannelById(config.getChatChannelID())) && config.isCommandsInChatChannel() || event.getChannel().equals(event.getGuild().getTextChannelById(config.getConsoleChannelID())))) {
                 event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").queue();
                 return;
             }
 
-            if (!Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(ServerInitializer.config.getCommandsAccessRoleID()))) {
+            switch (content.toLowerCase(Locale.ROOT)) {
+                case "/list" -> {
+                    API.sendMessageToDiscord(getList(), event.getChannel());
+                    return;
+                }
+                case "/tps" -> {
+                    API.sendMessageToDiscord(getTps(), event.getChannel());
+                    return;
+                }
+                case "/uptime" -> {
+                    API.sendMessageToDiscord(API.getUpTime().toString(), event.getChannel());
+                    return;
+                }
+            }
+
+            if (!Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(config.getCommandsAccessRoleID()))) {
                 event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> you don't have access to the console. If you believe you should have access, contact an Admin of this discord server.").queue();
                 return;
             }
 
-            //Checks if the user has the appropriate role
-
-            //Updates the config if /updateconfigs is run
-            //TODO: change /updateconfigs to a discord / command
-            if (content.toLowerCase(Locale.ROOT).equals("/updateconfigs")) {
-                ServerInitializer.updateConfigs();
-                API.sendMessageToDiscord("Configs updated!", event.getChannel());
-                return;
-            } else if (content.toLowerCase(Locale.ROOT).equals("/list")) {
-                API.sendMessageToDiscord(getList(), event.getChannel());
-                return;
-            } else if (content.toLowerCase(Locale.ROOT).equals("/tps")) {
-                API.sendMessageToDiscord(getTps(), event.getChannel());
-                return;
-            } else if (content.toLowerCase(Locale.ROOT).equals("/uptime")) {
-                API.sendMessageToDiscord(API.getUpTime().toString(), event.getChannel());
-                return;
-            }
             runCommand(event);
 
-            if (API.checkIfSomethingIsPresent(ServerInitializer.config.getCommandsForEveryone(), String.valueOf(event.getMessage()))) {
+            if (API.checkIfSomethingIsPresent(config.getCommandsForEveryone(), String.valueOf(event.getMessage()))) {
                 runCommand(event);
             }
         } else {
-            if (!event.getChannel().equals(event.getGuild().getTextChannelById(ServerInitializer.config.getChatChannelID())))
+            if (!event.getChannel().equals(event.getGuild().getTextChannelById(config.getChatChannelID())))
                 return;
             //Send message to Minecraft chat
             API.sendMessage("[" + Objects.requireNonNull(event.getMember()).getUser().getName() + "] " + content, false, false, true);
@@ -92,19 +93,83 @@ public class ChatThroughDiscord extends ListenerAdapter {
 
     //Prompts
     public static void serverStartingMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStartingPrompt(), false, true, false);
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle(config.getServerStartingPrompt());
+        eb.setColor(Color.TRANSLUCENT);
+        if (config.isOnlyWebhooks()) {
+            if (config.isWebhooksEnabled()) {
+                API.sendEmbedToDiscordChat(eb);
+            } else if (config.isChatEnabled()) {
+                API.sendMessage(config.getServerStartingPrompt(), false, true, false);
+            }
+        } else {
+            if (config.isWebhooksEnabled()) {
+                API.sendEmbedToDiscordChat(eb);
+            }
+            if (config.isChatEnabled()) {
+                API.sendMessage(config.getServerStartingPrompt(), false, true, false);
+            }
+        }
     }
 
     public static void serverStartedMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStartedPrompt(), false, true, false);
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle(config.getServerStartedPrompt());
+        eb.setColor(Color.TRANSLUCENT);
+        if (config.isOnlyWebhooks()) {
+            if (config.isWebhooksEnabled()) {
+                API.sendEmbedToDiscordChat(eb);
+            } else if (config.isChatEnabled()) {
+                API.sendMessage(config.getServerStartedPrompt(), false, true, false);
+            }
+        } else {
+            if (config.isWebhooksEnabled()) {
+                API.sendEmbedToDiscordChat(eb);
+            }
+            if (config.isChatEnabled()) {
+                API.sendMessage(config.getServerStartedPrompt(), false, true, false);
+            }
+        }
     }
 
     public static void serverStoppingMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStoppingPrompt(), false, true, false);
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle(config.getServerStoppingPrompt());
+        eb.setColor(Color.TRANSLUCENT);
+        if (config.isOnlyWebhooks()) {
+            if (config.isWebhooksEnabled()) {
+                API.sendEmbedToDiscordChat(eb);
+            } else if (config.isChatEnabled()) {
+                API.sendMessage(config.getServerStoppingPrompt(), false, true, false);
+            }
+        } else {
+            if (config.isWebhooksEnabled()) {
+                API.sendEmbedToDiscordChat(eb);
+            }
+            if (config.isChatEnabled()) {
+                API.sendMessage(config.getServerStoppingPrompt(), false, true, false);
+            }
+        }
     }
 
     public static void serverStoppedMethod() {
-        API.sendMessage(ServerInitializer.config.getServerStoppedPrompt(), false, true, false);
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle(config.getServerStoppedPrompt());
+        eb.setColor(Color.TRANSLUCENT);
+        if (config.isOnlyWebhooks()) {
+            if (config.isWebhooksEnabled()) {
+                API.sendEmbedToDiscordChat(eb);
+            } else if (config.isChatEnabled()) {
+                API.sendMessage(config.getServerStoppedPrompt(), false, true, false);
+            }
+        } else {
+            if (config.isWebhooksEnabled()) {
+                API.sendEmbedToDiscordChat(eb);
+            }
+            if (config.isChatEnabled()) {
+                API.sendMessage(config.getServerStoppedPrompt(), false, true, false);
+            }
+        }
     }
 
     public static void runCommand(@NotNull MessageReceivedEvent event) {
@@ -171,9 +236,9 @@ public class ChatThroughDiscord extends ListenerAdapter {
         if (API.getServerVariable().getCurrentPlayerCount() != 0) {
             formattedString.append("Players online are: ");
             for (int i = 0; i < playerNames.length - 1; i++) {
-                formattedString.append(playerNames[i]).append(":").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getDimension()).append(", ");
+                formattedString.append(playerNames[i]).append(":").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i]))).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getRegistryKey().getValue().toString()).append(", ");
             }
-            formattedString.append(playerNames[playerNames.length - 1]).append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getDimension());
+            formattedString.append(playerNames[playerNames.length - 1]).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getRegistryKey().getValue().toString());
         }
         formattedString.append("\nThere are ");
         formattedString.append(API.getServerVariable().getCurrentPlayerCount());

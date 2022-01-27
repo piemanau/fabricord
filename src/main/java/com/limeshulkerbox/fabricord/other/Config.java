@@ -2,13 +2,8 @@ package com.limeshulkerbox.fabricord.other;
 
 import blue.endless.jankson.annotation.SerializedName;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 
 @Data
-//@ToString
-//@EqualsAndHashCode
 public class Config {
 
     @SerializedName("config_version")
@@ -79,16 +74,10 @@ public class Config {
     private String serverStoppedPrompt;
 
 
-    @SerializedName("keys_to_send_to_discord")
-    private String[] keysToSendToDiscord;
-
     @SerializedName("commands_for_everyone")
     private String[] commandsForEveryone;
 
-    @SerializedName("send_other_keys_to_discord")
-    private boolean sendOtherKeysToDiscord;
-
-    public Config(float configversion, String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, boolean onlyWebhooks, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] keysToSendToDiscord, String[] commandsForEveryone, boolean sendOtherKeysToDiscord) {
+    public Config(float configversion, String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, boolean onlyWebhooks, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] commandsForEveryone) {
         this.configVersion = configversion;
 
         this.botToken = botToken;
@@ -117,9 +106,6 @@ public class Config {
         this.serverStoppedPrompt = serverStoppedPrompt;
 
         this.commandsForEveryone = commandsForEveryone;
-        this.keysToSendToDiscord = keysToSendToDiscord;
-
-        this.sendOtherKeysToDiscord = sendOtherKeysToDiscord;
     }
 
     public Config()
