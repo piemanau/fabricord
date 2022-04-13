@@ -49,8 +49,6 @@ public class ChatThroughDiscord extends ListenerAdapter {
         if (content.startsWith("/")) {
             //Check correct channel
             if (!(event.getChannel().equals(event.getGuild().getTextChannelById(config.getChatChannelID())) && config.isCommandsInChatChannel() || event.getChannel().equals(event.getGuild().getTextChannelById(config.getConsoleChannelID())))) {
-                //ServerInitializer.getDiscordApi().getTextChannelById(event.getChannel().getId()).         Attempting to send a ephemeral message
-                //event.getMessage()..("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").setEphemeral(true);
                 event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> this is not the console channel or commands are not enabled here.").queue();
                 return;
             }
