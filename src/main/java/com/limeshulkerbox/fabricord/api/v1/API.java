@@ -3,20 +3,15 @@ package com.limeshulkerbox.fabricord.api.v1;
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
+import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.minecraft.network.MessageType;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
 import javax.management.timer.Timer;
-import java.util.Iterator;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.*;
 
@@ -35,6 +30,7 @@ public class API {
      */
 
     public static void sendMessageToDiscord(String message, MessageChannel channelID) {
+        if (!canUseBot) return;
         if (message.length() <= messageSplitterAmount) {
             Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(channelID.getId())).sendMessage(message).queue();
         } else {
@@ -57,6 +53,7 @@ public class API {
      * This is the message you want to send.
      */
     public static void sendMessageToDiscordChat(String message) {
+        if (!canUseBot) return;
         if (message.length() <= messageSplitterAmount) {
             Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessage(message).queue();
         } else {
@@ -70,6 +67,7 @@ public class API {
      * This is the embed you want to send.
      */
     public static void sendEmbedToDiscordChat(EmbedBuilder embed) {
+        if (!canUseBot) return;
         if (embed.length() <= messageSplitterAmount) {
             Objects.requireNonNull(Objects.requireNonNull(getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessageEmbeds(embed.build())).queue();
         }
@@ -81,6 +79,7 @@ public class API {
      * This is the message you want to send.
      */
     public static void sendMessageToDiscordConsole(String message) {
+        if (!canUseBot) return;
         if (message.length() <= messageSplitterAmount) {
             Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getConsoleChannelID())).sendMessage(message).queue();
         } else {
@@ -100,6 +99,7 @@ public class API {
      * This is the URL of the webhook.
      */
     public static void sendMessageToDiscordWebhook(String message, String botName, String botAvatarLink, String webHookUrl) {
+        if (!canUseBot) return;
         WebhookMessageBuilder messageBuilder = new WebhookMessageBuilder();
         WebhookClient client = WebhookClient.withUrl(webHookUrl);
         messageBuilder.setUsername(botName).setAvatarUrl(botAvatarLink).setContent(message);
@@ -118,6 +118,7 @@ public class API {
      * This asks if you want to send to the Minecraft in-game chat.
      */
     public static void sendMessage(String message, boolean sendToDiscordConsole, boolean sendToDiscordChat, boolean sendToMinecraft) {
+        if (!canUseBot) return;
         if (jdaReady) {
             if (sendToDiscordConsole) {
                 sendMessageToDiscordConsole(message);
@@ -182,7 +183,23 @@ public class API {
      * @return
      * This returns the server uptime.
      */
-    public static Timer getUpTime() {
+    public static String getUpTime() {
+        return GetServerPromptEvents.GetServerStartedEvent.getUptime();
+    }
+
+    /**
+     * @return
+     * This returns the server TPS.
+     */
+    public static double getTPS() {
+        return ServerInitializer.getTPS();
+    }
+
+    /**
+     * @return
+     * This returns the server uptime variable, please don't mess with this unless you know what you are doing.
+     */
+    public static Timer getUpTimeVariable() {
         return upTime;
     }
 }

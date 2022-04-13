@@ -2,10 +2,6 @@ package com.limeshulkerbox.fabricord.minecraft.events;
 
 import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
-import me.lucko.spark.api.Spark;
-import me.lucko.spark.api.SparkProvider;
-import me.lucko.spark.api.statistic.StatisticWindow;
-import me.lucko.spark.api.statistic.types.DoubleStatistic;
 import net.dv8tion.jda.api.entities.Activity;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
@@ -32,7 +28,7 @@ public class GetServerPromptEvents {
 
         @Override
         public void onServerStarted(MinecraftServer server) {
-            API.getUpTime().start();
+            API.getUpTimeVariable().start();
             if (ServerInitializer.config.isPromptsEnabled()) {
                 serverStartedMethod();
             }
@@ -46,12 +42,8 @@ public class GetServerPromptEvents {
                         if (wait > 0) Thread.sleep(wait); //should blocking-wait
                         //do stuff
                         {
-                            if (SparkProvider.get() != null) {
-                                Spark spark = SparkProvider.get();
-                                    DoubleStatistic<StatisticWindow.TicksPerSecond> tps = spark.tps();
-                                    assert tps != null;
-                                    double tpsLast10Secs = tps.poll(StatisticWindow.TicksPerSecond.SECONDS_10);
-                                    ServerInitializer.getDiscordApi().getPresence().setActivity(Activity.playing(String.format("Minecraft with %s other players! With a TPS of %.01f and uptime of %s.", API.getServerVariable().getCurrentPlayerCount() + "/" + API.getServerVariable().getMaxPlayerCount(), tpsLast10Secs, getUptime())));
+                            if (ServerInitializer.canUseBot) {
+                                ServerInitializer.getDiscordApi().getPresence().setActivity(Activity.playing(String.format("Minecraft with %s other players! With a TPS of %.01f and uptime of %s.", API.getServerVariable().getCurrentPlayerCount() + "/" + API.getServerVariable().getMaxPlayerCount(), API.getTPS(), GetServerPromptEvents.GetServerStartedEvent.getUptime())));
                             }
                         }
                     }

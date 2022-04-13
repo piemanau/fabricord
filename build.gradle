@@ -47,7 +47,6 @@ dependencies {
 	include implementation("net.dv8tion:JDA:${project.jda_version}") {
 		exclude module: 'opus-java'
 	}
-	compileOnly 'me.lucko:spark-api:0.1-SNAPSHOT'
 
 	//lombok, used for getters and setters
 	compileOnly 'org.projectlombok:lombok:1.18.22'

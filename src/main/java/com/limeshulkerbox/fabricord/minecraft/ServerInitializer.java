@@ -12,23 +12,25 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import javax.security.auth.login.LoginException;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Logger;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
 @Environment(EnvType.SERVER)
 public class ServerInitializer implements DedicatedServerModInitializer {
 
+    public static boolean canUseBot = false;
     public static Config config;
     public static boolean jdaReady = false;
     static JDA api;
@@ -134,19 +136,15 @@ public class ServerInitializer implements DedicatedServerModInitializer {
             }));
         });
 
-        try {
-            ChatThroughDiscord.registerDiscordCommands();
-        } catch (LoginException e) {
-            e.printStackTrace();
-        }
-
-        if (!config.getBotToken().equals("")) {
+        if (!config.getBotToken().equals("") && !config.getBotToken().equals("Add bot token here")) {
             //Make the Discord bot come alive
             try {
                 api = JDABuilder.createDefault(config.getBotToken()).addEventListeners(new ChatThroughDiscord()).build();
             } catch (LoginException e) {
                 e.printStackTrace();
             }
+
+            canUseBot = true;
 
             //Register and make appender
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
@@ -160,6 +158,26 @@ public class ServerInitializer implements DedicatedServerModInitializer {
             ServerLifecycleEvents.SERVER_STARTED.register(new GetServerPromptEvents.GetServerStartedEvent());
             ServerLifecycleEvents.SERVER_STOPPING.register(new GetServerPromptEvents.GetServerStoppingEvent());
             ServerLifecycleEvents.SERVER_STOPPED.register(new GetServerPromptEvents.GetServerStoppedEvent());
+        } else {
+            canUseBot = false;
+            Logger.getLogger("Fabricord Logger").warning("Fabricord is currently NOT active, please check your config located in config/limeshulkerbox/fabricord.json and restart your server.");
         }
+    }
+
+    private static int ticksPassed = 0;
+
+    private static double tps;
+
+    public static void onTick(MinecraftServer server) {
+        ticksPassed++;
+        if (ticksPassed <= 40)
+            return;
+        ticksPassed = 0;
+        double avgTickTime = server.lastTickLengths[99] * 1.0E-6D;
+        tps = Math.min(1000.0D / avgTickTime, 20.0D);
+    }
+
+    public static double getTPS() {
+        return tps;
     }
 }
