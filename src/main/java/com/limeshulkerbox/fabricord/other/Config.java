@@ -7,7 +7,7 @@ import lombok.Data;
 public class Config {
 
     @SerializedName("config_version")
-    private float configVersion;
+    private int configVersion;
 
     @SerializedName("bot_token")
     private String botToken;
@@ -74,10 +74,40 @@ public class Config {
     private String serverStoppedPrompt;
 
 
-    @SerializedName("commands_for_everyone")
-    private String[] commandsForEveryone;
+    @SerializedName("send_wrong_channel_message")
+    private boolean sendWrongChannelMessage;
+    @SerializedName("send_discriminator_to_minecraft")
+    private boolean sendDiscriminatorToMinecraft;
 
-    public Config(float configversion, String botToken, String commandsAccessRoleID, int updateBotStatusEvery, boolean chatEnabled, String chatChannelID, boolean commandsInChatChannel, boolean promptsEnabled, boolean consoleEnabled, String consoleChannelID, boolean showInfoLogsInConsole, boolean showWarnLogsInConsole, boolean showErrorLogsInConsole, boolean showDebugLogsInConsole, boolean webhooksEnabled, boolean onlyWebhooks, String webhookURL, String serverStartingPrompt, String serverStartedPrompt, String serverStoppingPrompt, String serverStoppedPrompt, String[] commandsForEveryone) {
+    public Config(int configversion,
+                  String botToken,
+                  String commandsAccessRoleID,
+                  int updateBotStatusEvery,
+
+                  boolean chatEnabled,
+                  String chatChannelID,
+                  boolean commandsInChatChannel,
+                  boolean sendWrongChannelMessage,
+                  boolean promptsEnabled,
+
+                  boolean consoleEnabled,
+                  String consoleChannelID,
+                  boolean showInfoLogsInConsole,
+                  boolean showWarnLogsInConsole,
+                  boolean showErrorLogsInConsole,
+                  boolean showDebugLogsInConsole,
+
+                  boolean webhooksEnabled,
+                  boolean onlyWebhooks,
+                  String webhookURL,
+
+                  String serverStartingPrompt,
+                  String serverStartedPrompt,
+                  String serverStoppingPrompt,
+                  String serverStoppedPrompt,
+
+                  boolean sendDiscriminatorToMinecraft) {
+
         this.configVersion = configversion;
 
         this.botToken = botToken;
@@ -87,6 +117,7 @@ public class Config {
         this.chatEnabled = chatEnabled;
         this.chatChannelID = chatChannelID;
         this.commandsInChatChannel = commandsInChatChannel;
+        this.sendWrongChannelMessage = sendWrongChannelMessage;
         this.promptsEnabled = promptsEnabled;
 
         this.consoleEnabled = consoleEnabled;
@@ -105,9 +136,9 @@ public class Config {
         this.serverStoppingPrompt = serverStoppingPrompt;
         this.serverStoppedPrompt = serverStoppedPrompt;
 
-        this.commandsForEveryone = commandsForEveryone;
+        this.sendDiscriminatorToMinecraft = sendDiscriminatorToMinecraft;
     }
-
+    
     public Config()
     {
 

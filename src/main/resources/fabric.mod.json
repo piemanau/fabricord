@@ -13,7 +13,6 @@
     "issues": "https://github.com/LimeShulkerBox/fabric-discord-chat-and-console/issues"
   },
   "license": "MIT",
-  "icon": "assets/fabricord/icon.png",
   "environment": "server",
   "entrypoints": {
     "server": [
@@ -24,10 +23,9 @@
     "fabricord.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.11.7",
+    "fabricloader": ">=0.14.7",
     "fabric": "*",
-    "minecraft": ">=1.17",
-    "java": ">=17",
-    "fabric-language-kotlin": "*"
+    "minecraft": ">=1.18.2",
+    "java": ">=17"
   }
 }

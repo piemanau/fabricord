@@ -82,7 +82,7 @@ public class GetServerPromptEvents {
             if (ServerInitializer.config.isPromptsEnabled()) {
                 serverStoppedMethod();
             }
-            ServerInitializer.stopDiscordBot();
+            API.stopDiscordBot();
         }
     }
 }

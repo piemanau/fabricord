@@ -1,21 +1,30 @@
 package com.limeshulkerbox.fabricord.api.v1;
 
+import blue.endless.jankson.JsonObject;
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
+import com.limeshulkerbox.fabricord.other.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.MessageType;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import net.minecraft.text.Text;
 
 import javax.management.timer.Timer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.*;
 
 public class API {
+
+    static String sConfigPath = FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fabricord.json";
+    static Path configPath = Paths.get(sConfigPath);
 
     private static MinecraftDedicatedServer server;
 
@@ -201,5 +210,63 @@ public class API {
      */
     public static Timer getUpTimeVariable() {
         return upTime;
+    }
+
+    /**
+     * This will reload the config for Fabricord
+     * @param restartDiscordBot
+     * If true then the Discord bot will restart after it has reloaded the config.
+     */
+    public static void reloadConfig(boolean restartDiscordBot) {
+        try {
+            JsonObject json = jankson.load(Files.readString(configPath));
+            config = jankson.fromJson(json, Config.class);
+            if (!restartDiscordBot) return;
+            stopDiscordBot();
+            startDiscordBot();
+        } catch (Exception e) {
+            e.printStackTrace();
+            config = new Config(2,
+                    "",
+                    "",
+                    5000,
+                    false,
+                    "",
+                    true,
+                    true,
+                    true,
+                    false,
+                    "",
+                    false,
+                    true,
+                    true,
+                    true,
+                    false,
+                    true,
+                    "",
+                    "Server starting",
+                    "Server started",
+                    "Server stopping",
+                    "Server stopped",
+                    false);
+        }
+    }
+
+    /**
+     * This stops the discord bot
+     */
+    public static void stopDiscordBot() {
+        if (getDiscordApi() == null) return;
+        jdaReady = false;
+        getDiscordApi().shutdown();
+        setDiscordApiToNull();
+    }
+
+    /**
+     * @return
+     * the Fabricord config path
+     */
+    public static Path getConfigPath() {
+        return configPath;
     }
 }

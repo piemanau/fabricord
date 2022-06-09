@@ -1,9 +1,11 @@
 package com.limeshulkerbox.fabricord.minecraft;
 
 import blue.endless.jankson.Jankson;
+import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.discord.ChatThroughDiscord;
 import com.limeshulkerbox.fabricord.minecraft.events.*;
 import com.limeshulkerbox.fabricord.other.Config;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -11,8 +13,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -20,8 +22,6 @@ import org.apache.logging.log4j.core.LoggerContext;
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -34,9 +34,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
     public static Config config;
     public static boolean jdaReady = false;
     static JDA api;
-    static String sConfigPath = FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fabricord.json";
-    static Path configPath = Paths.get(sConfigPath);
-    static Config defaultConfig = new Config(1.1f,
+    static Config defaultConfig = new Config(2,
             "Add bot token here",
             "",
             5000,
@@ -45,66 +43,32 @@ public class ServerInitializer implements DedicatedServerModInitializer {
             true,
             true,
             true,
-            "",
             true,
+            "",
             true,
             true,
             false,
             true,
             true,
+            false,
             "Add webhook URL here",
             "Server starting",
             "Server started",
             "Server stopping",
             "Server stopped",
-            new String[]{""});
+            false);
 
     public static final Jankson jankson = Jankson.builder().build();
     public static final UUID modUUID = UUID.fromString("0c4fc385-8b46-4ef2-8375-fcd19d71f45e");
     public static final int messageSplitterAmount = 2000;
 
-    public static void stopDiscordBot() {
-        if (api == null) return;
-        jdaReady = false;
-        api.shutdown();
-        api = null;
-    }
 
     public static JDA getDiscordApi() {
         return api;
     }
 
-    //Method to grab stuff from the config file
-    public static void updateConfigs() {
-        try {
-            String contents = Files.readString(configPath);
-            var json = jankson.load(contents);
-            config = jankson.fromJson(json, Config.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            config = new Config(1.1f,
-                    "",
-                    "",
-                    5000,
-                    false,
-                    "",
-                    true,
-                    true,
-                    false,
-                    "",
-                    false,
-                    true,
-                    true,
-                    true,
-                    false,
-                    true,
-                    "",
-                    "Server starting",
-                    "Server started",
-                    "Server stopping",
-                    "Server stopped",
-                    new String[0]);
-        }
+    public static void setDiscordApiToNull() {
+        api = null;
     }
 
     @Override
@@ -112,39 +76,41 @@ public class ServerInitializer implements DedicatedServerModInitializer {
 
         //Create default config file
         try {
-            if (!Files.exists(configPath)) {
-                if (!Files.exists(configPath.getParent())) {
-                    Files.createDirectory(configPath.getParent());
+            if (!Files.exists(API.getConfigPath())) {
+                if (!Files.exists(API.getConfigPath().getParent())) {
+                    Files.createDirectory(API.getConfigPath().getParent());
                 }
 
                 String str = jankson.toJson(defaultConfig).toJson(true, true);
-                Files.writeString(configPath, str);
+                Files.writeString(API.getConfigPath(), str);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         //Get the configs from the json
-        updateConfigs();
+        API.reloadConfig(true);
 
         //Update configs command in MC
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            dispatcher.register(literal("updateconfigs").executes(context -> {
-                updateConfigs();
-                context.getSource().sendFeedback(Text.of("Successfully updated the configs!"), true);
+            dispatcher.register(literal("fabricord").then(CommandManager.literal("config").then(CommandManager.literal("reload")
+
+                    .executes((context -> {
+                        API.reloadConfig(false);
+                        context.getSource().sendFeedback(Text.of("Successfully updated the config!"), true);
+                        return 1;
+                    }))
+
+                    .then(CommandManager.argument("do_restart_discord_bot", BoolArgumentType.bool()).executes((context -> {
+                if (BoolArgumentType.getBool(context, "do_restart_discord_bot")) context.getSource().sendFeedback(Text.of("Attempting to reload the config and discord bot..."), true);
+                API.reloadConfig(BoolArgumentType.getBool(context, "do_restart_discord_bot"));
+                context.getSource().sendFeedback(Text.of("Successfully updated the config!"), true);
                 return 1;
-            }));
+            }))
+            ))));
         });
 
         if (!config.getBotToken().equals("") && !config.getBotToken().equals("Add bot token here")) {
-            //Make the Discord bot come alive
-            try {
-                api = JDABuilder.createDefault(config.getBotToken()).addEventListeners(new ChatThroughDiscord()).build();
-            } catch (LoginException e) {
-                e.printStackTrace();
-            }
-
-            canUseBot = true;
 
             //Register and make appender
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
@@ -160,7 +126,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
             ServerLifecycleEvents.SERVER_STOPPED.register(new GetServerPromptEvents.GetServerStoppedEvent());
         } else {
             canUseBot = false;
-            Logger.getLogger("Fabricord Logger").warning("Fabricord is currently NOT active, please check your config located in config/limeshulkerbox/fabricord.json and restart your server.");
+            Logger.getLogger("Fabricord Logger").warning("Fabricord is currently NOT active, please check your config located in config/limeshulkerbox/fabricord.json and restart your server. If the issue persists please join the Discord server here: https://discord.com/invite/XhHuYG7aXT");
         }
     }
 
@@ -179,5 +145,15 @@ public class ServerInitializer implements DedicatedServerModInitializer {
 
     public static double getTPS() {
         return tps;
+    }
+
+    public static void startDiscordBot() {
+        //Make the Discord bot come alive
+        try {
+            api = JDABuilder.createDefault(config.getBotToken()).addEventListeners(new ChatThroughDiscord()).build();
+        } catch (LoginException e) {
+            e.printStackTrace();
+        }
+        canUseBot = true;
     }
 }
