@@ -26,6 +26,18 @@ public class GetServerPromptEvents {
         public static Date startTime;
         public static Thread thread;
 
+        public static String getUptime() {
+            Date time2 = new Date();
+            long ms = (time2.getTime() - startTime.getTime());
+            long secs = ms / 1000;
+            //ms -= secs * 1000;
+            long mins = secs / 60;
+            secs -= mins * 60;
+            long hours = mins / 60;
+            mins -= hours * 60;
+            return String.format("%2d:%02d:%02d", hours, mins, secs);
+        }
+
         @Override
         public void onServerStarted(MinecraftServer server) {
             API.getUpTimeVariable().start();
@@ -51,18 +63,6 @@ public class GetServerPromptEvents {
                 }
             }, "Fabricord update status thread");
             thread.start();
-        }
-
-        public static String getUptime() {
-            Date time2 = new Date();
-            long ms = (time2.getTime() - startTime.getTime());
-            long secs = ms / 1000;
-            //ms -= secs * 1000;
-            long mins = secs / 60;
-            secs -= mins * 60;
-            long hours = mins / 60;
-            mins -= hours * 60;
-            return String.format("%2d:%02d:%02d", hours, mins, secs);
         }
     }
 
