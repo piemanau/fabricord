@@ -28,14 +28,13 @@ public class API {
 
     private static MinecraftDedicatedServer server;
 
-    private static Timer upTime = new Timer();
+    private static final Timer upTime = new Timer();
 
     /**
      * Send any message to any channel in a Discord server.
-     * @param message
-     * This is the message you want to send.
-     * @param channelID
-     * This is the channel you want to send the message in.
+     *
+     * @param message   This is the message you want to send.
+     * @param channelID This is the channel you want to send the message in.
      */
 
     public static void sendMessageToDiscord(String message, MessageChannel channelID) {
@@ -49,8 +48,8 @@ public class API {
 
     /**
      * This method sends whatever message to the Minecraft chat.
-     * @param message
-     * This is the message you want to send to the Minecraft chat.
+     *
+     * @param message This is the message you want to send to the Minecraft chat.
      */
     public static void sendMessageToMinecraft(String message) {
         server.getPlayerManager().broadcast(Text.of(message), MessageType.CHAT, modUUID);
@@ -58,8 +57,8 @@ public class API {
 
     /**
      * This is the message you want to send to the Discord version of the Minecraft chat, where messages go that are sent in-game.
-     * @param message
-     * This is the message you want to send.
+     *
+     * @param message This is the message you want to send.
      */
     public static void sendMessageToDiscordChat(String message) {
         if (!canUseBot) return;
@@ -72,8 +71,8 @@ public class API {
 
     /**
      * This is the embed you want to send to the Discord version of the Minecraft chat, where messages go that are sent in-game.
-     * @param embed
-     * This is the embed you want to send.
+     *
+     * @param embed This is the embed you want to send.
      */
     public static void sendEmbedToDiscordChat(EmbedBuilder embed) {
         if (!canUseBot) return;
@@ -84,8 +83,8 @@ public class API {
 
     /**
      * This is where you send a message to the console from Minecraft in Discord.
-     * @param message
-     * This is the message you want to send.
+     *
+     * @param message This is the message you want to send.
      */
     public static void sendMessageToDiscordConsole(String message) {
         if (!canUseBot) return;
@@ -98,14 +97,11 @@ public class API {
 
     /**
      * This is where you can send a message through a Discord webhook.
-     * @param message
-     * This is the message you want to send.
-     * @param botName
-     * This is the name the webhook 'bot' will have.
-     * @param botAvatarLink
-     * This is the avatar the webhook 'bot' will have.
-     * @param webHookUrl
-     * This is the URL of the webhook.
+     *
+     * @param message       This is the message you want to send.
+     * @param botName       This is the name the webhook 'bot' will have.
+     * @param botAvatarLink This is the avatar the webhook 'bot' will have.
+     * @param webHookUrl    This is the URL of the webhook.
      */
     public static void sendMessageToDiscordWebhook(String message, String botName, String botAvatarLink, String webHookUrl) {
         if (!canUseBot) return;
@@ -117,14 +113,11 @@ public class API {
 
     /**
      * Here you can send a message to multiple places.
-     * @param message
-     * This is the message you want to send.
-     * @param sendToDiscordConsole
-     * This asks if you want to send to the Discord console.
-     * @param sendToDiscordChat
-     * This asks if you want to send to the Discord chat.
-     * @param sendToMinecraft
-     * This asks if you want to send to the Minecraft in-game chat.
+     *
+     * @param message              This is the message you want to send.
+     * @param sendToDiscordConsole This asks if you want to send to the Discord console.
+     * @param sendToDiscordChat    This asks if you want to send to the Discord chat.
+     * @param sendToMinecraft      This asks if you want to send to the Minecraft in-game chat.
      */
     public static void sendMessage(String message, boolean sendToDiscordConsole, boolean sendToDiscordChat, boolean sendToMinecraft) {
         if (!canUseBot) return;
@@ -145,8 +138,8 @@ public class API {
 
     /**
      * This returns the dedicated server variable if you need it.
-     * @return
-     * Returns the server variable.
+     *
+     * @return Returns the server variable.
      */
     public static MinecraftDedicatedServer getServerVariable() {
         return server;
@@ -154,8 +147,8 @@ public class API {
 
     /**
      * Sets the server variable to use for commands.
-     * @param server
-     * The server variable.
+     *
+     * @param server The server variable.
      */
     public static void setServerVariable(MinecraftDedicatedServer server) {
         API.server = server;
@@ -163,12 +156,10 @@ public class API {
 
     /**
      * This checks if the target is anywhere to be found in the array.
-     * @param array
-     * The array you want to check in.
-     * @param target
-     * The target you want to check for.
-     * @return
-     * Returns true/false if it is there or not.
+     *
+     * @param array  The array you want to check in.
+     * @param target The target you want to check for.
+     * @return Returns true/false if it is there or not.
      */
     public static boolean checkIfSomethingIsPresent(String[] array, String target) {
         if (array != null && target != null) {
@@ -189,24 +180,21 @@ public class API {
     }
 
     /**
-     * @return
-     * This returns the server uptime.
+     * @return This returns the server uptime.
      */
     public static String getUpTime() {
         return GetServerPromptEvents.GetServerStartedEvent.getUptime();
     }
 
     /**
-     * @return
-     * This returns the server TPS.
+     * @return This returns the server TPS.
      */
     public static double getTPS() {
         return ServerInitializer.getTPS();
     }
 
     /**
-     * @return
-     * This returns the server uptime variable, please don't mess with this unless you know what you are doing.
+     * @return This returns the server uptime variable, please don't mess with this unless you know what you are doing.
      */
     public static Timer getUpTimeVariable() {
         return upTime;
@@ -214,8 +202,8 @@ public class API {
 
     /**
      * This will reload the config for Fabricord
-     * @param restartDiscordBot
-     * If true then the Discord bot will restart after it has reloaded the config.
+     *
+     * @param restartDiscordBot If true then the Discord bot will restart after it has reloaded the config.
      */
     public static void reloadConfig(boolean restartDiscordBot) {
         try {
@@ -263,8 +251,7 @@ public class API {
     }
 
     /**
-     * @return
-     * the Fabricord config path
+     * @return the Fabricord config path
      */
     public static Path getConfigPath() {
         return configPath;

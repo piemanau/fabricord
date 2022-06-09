@@ -30,67 +30,13 @@ public class ChatThroughDiscord extends ListenerAdapter {
     public ChatThroughDiscord() {
     }
 
-    @Override
-    public void onReady(@Nonnull ReadyEvent event) {
-        ServerInitializer.jdaReady = true;
-    }
-
-    @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        super.onMessageReceived(event);
-
-        //Makes sure the sender is not a bot
-        if (event.getAuthor().isBot()) return;
-
-        //Gets the raw content of the message
-        content = event.getMessage().getContentRaw();
-
-        //See if the message is a command
-        if (content.startsWith("/")) {
-            if (!isCorrectChannel(event, false)) return;
-            if (didFabricordCommandRun(event)) return;
-            if (!hasAccess(event)) return;
-            runMinecraftCommand(event);
-            return;
-        }
-        if (!isCorrectChannel(event, true)) return;
-        if (!config.isSendDiscriminatorToMinecraft()) {
-            String name = Objects.requireNonNull(event.getMember()).getUser().getName();
-            if (!(event.getMember().getNickname() == null)) name = event.getMember().getNickname();
-            API.sendMessage(String.format("[%s] %s", name, content), false, false, true);
-        } else {
-            API.sendMessage(String.format("<%s> %s", Objects.requireNonNull(event.getMember()).getUser().getAsTag(), content), false, false, true);
-        }
-      }
-
-    private boolean hasAccess(MessageReceivedEvent event) {
-        if (Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(config.getCommandsAccessRoleID()))) return true;
-        if (config.isSendWrongChannelMessage()) event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> you don't have access to the console. If you believe you should have access, contact an Admin of this discord server.").queue();
-        return false;
-    }
-
     private static boolean isCorrectChannel(MessageReceivedEvent event, boolean checkForChatOnly) {
-        if (checkForChatOnly && event.getChannel().equals(event.getGuild().getTextChannelById(config.getChatChannelID()))) return true;
-        if ((event.getChannel().equals(event.getGuild().getTextChannelById(config.getChatChannelID())) && config.isCommandsInChatChannel() || event.getChannel().equals(event.getGuild().getTextChannelById(config.getConsoleChannelID())))) return true;
-        if (config.isSendWrongChannelMessage()) event.getChannel().sendMessage("Sorry <@" + Objects.requireNonNull(event.getMember()).getId() + "> this is not the console channel or commands are not enabled here.").queue();
-        return false;
-    }
-
-    private boolean didFabricordCommandRun(MessageReceivedEvent event) {
-        switch (content.toLowerCase(Locale.ROOT)) {
-            case "/fabricord list" -> {
-                API.sendMessageToDiscord(getList(), event.getChannel());
-                return true;
-            }
-            case "/fabricord tps" -> {
-                API.sendMessageToDiscord("The server TPS is: " + API.getTPS(), event.getChannel());
-                return true;
-            }
-            case "/fabricord uptime" -> {
-                API.sendMessageToDiscord("The server has been up for" + GetServerPromptEvents.GetServerStartedEvent.getUptime(), event.getChannel());
-                return true;
-            }
-        }
+        if (checkForChatOnly && event.getChannel().equals(event.getGuild().getTextChannelById(config.getChatChannelID())))
+            return true;
+        if ((event.getChannel().equals(event.getGuild().getTextChannelById(config.getChatChannelID())) && config.isCommandsInChatChannel() || event.getChannel().equals(event.getGuild().getTextChannelById(config.getConsoleChannelID()))))
+            return true;
+        if (config.isSendWrongChannelMessage())
+            event.getChannel().sendMessage("Sorry <@" + Objects.requireNonNull(event.getMember()).getId() + "> this is not the console channel or commands are not enabled here.").queue();
         return false;
     }
 
@@ -126,20 +72,6 @@ public class ChatThroughDiscord extends ListenerAdapter {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private String getList() {
-        String[] playerNames = API.getServerVariable().getPlayerManager().getPlayerNames();
-        StringBuilder formattedString = new StringBuilder();
-        if (API.getServerVariable().getCurrentPlayerCount() != 0) {
-            formattedString.append("Players online are: ");
-            for (int i = 0; i < playerNames.length - 1; i++) {
-                formattedString.append(Objects.requireNonNull(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getName().getString())).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getRegistryKey().getValue().toString()).append(", ");
-            }
-            formattedString.append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getName().getString()).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getRegistryKey().getValue().toString());
-        }
-        formattedString.append(String.format("\nThere are %o players out of %o players.", API.getServerVariable().getCurrentPlayerCount(), API.getServerVariable().getMaxPlayerCount()));
-        return formattedString.toString();
     }
 
     //Prompts
@@ -221,5 +153,78 @@ public class ChatThroughDiscord extends ListenerAdapter {
                 API.sendMessage(config.getServerStoppedPrompt(), false, true, false);
             }
         }
+    }
+
+    @Override
+    public void onReady(@Nonnull ReadyEvent event) {
+        ServerInitializer.jdaReady = true;
+    }
+
+    @Override
+    public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        super.onMessageReceived(event);
+
+        //Makes sure the sender is not a bot
+        if (event.getAuthor().isBot()) return;
+
+        //Gets the raw content of the message
+        content = event.getMessage().getContentRaw();
+
+        //See if the message is a command
+        if (content.startsWith("/")) {
+            if (!isCorrectChannel(event, false)) return;
+            if (didFabricordCommandRun(event)) return;
+            if (!hasAccess(event)) return;
+            runMinecraftCommand(event);
+            return;
+        }
+        if (!isCorrectChannel(event, true)) return;
+        if (!config.isSendDiscriminatorToMinecraft()) {
+            String name = Objects.requireNonNull(event.getMember()).getUser().getName();
+            if (!(event.getMember().getNickname() == null)) name = event.getMember().getNickname();
+            API.sendMessage(String.format("[%s] %s", name, content), false, false, true);
+        } else {
+            API.sendMessage(String.format("<%s> %s", Objects.requireNonNull(event.getMember()).getUser().getAsTag(), content), false, false, true);
+        }
+    }
+
+    private boolean hasAccess(MessageReceivedEvent event) {
+        if (Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(config.getCommandsAccessRoleID())))
+            return true;
+        if (config.isSendWrongChannelMessage())
+            event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> you don't have access to the console. If you believe you should have access, contact an Admin of this discord server.").queue();
+        return false;
+    }
+
+    private boolean didFabricordCommandRun(MessageReceivedEvent event) {
+        switch (content.toLowerCase(Locale.ROOT)) {
+            case "/fabricord list" -> {
+                API.sendMessageToDiscord(getList(), event.getChannel());
+                return true;
+            }
+            case "/fabricord tps" -> {
+                API.sendMessageToDiscord("The server TPS is: " + API.getTPS(), event.getChannel());
+                return true;
+            }
+            case "/fabricord uptime" -> {
+                API.sendMessageToDiscord("The server has been up for" + GetServerPromptEvents.GetServerStartedEvent.getUptime(), event.getChannel());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getList() {
+        String[] playerNames = API.getServerVariable().getPlayerManager().getPlayerNames();
+        StringBuilder formattedString = new StringBuilder();
+        if (API.getServerVariable().getCurrentPlayerCount() != 0) {
+            formattedString.append("Players online are: ");
+            for (int i = 0; i < playerNames.length - 1; i++) {
+                formattedString.append(Objects.requireNonNull(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getName().getString())).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getRegistryKey().getValue().toString()).append(", ");
+            }
+            formattedString.append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getName().getString()).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getRegistryKey().getValue().toString());
+        }
+        formattedString.append(String.format("\nThere are %o players out of %o players.", API.getServerVariable().getCurrentPlayerCount(), API.getServerVariable().getMaxPlayerCount()));
+        return formattedString.toString();
     }
 }

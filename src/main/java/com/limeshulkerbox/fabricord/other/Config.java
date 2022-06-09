@@ -138,9 +138,8 @@ public class Config {
 
         this.sendDiscriminatorToMinecraft = sendDiscriminatorToMinecraft;
     }
-    
-    public Config()
-    {
+
+    public Config() {
 
     }
 }
