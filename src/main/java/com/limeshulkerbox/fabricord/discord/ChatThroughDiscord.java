@@ -7,19 +7,20 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.DynamicRegistryManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.config;
 
@@ -30,6 +31,7 @@ public class ChatThroughDiscord extends ListenerAdapter {
     public ChatThroughDiscord() {
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean isCorrectChannel(MessageReceivedEvent event, boolean checkForChatOnly) {
         if (checkForChatOnly && event.getChannel().equals(event.getGuild().getTextChannelById(config.getChatChannelID())))
             return true;
@@ -42,12 +44,13 @@ public class ChatThroughDiscord extends ListenerAdapter {
 
     public static void runMinecraftCommand(@NotNull MessageReceivedEvent event) {
         //Register a new CommandManager
-        CommandManager command = new CommandManager(CommandManager.RegistrationEnvironment.DEDICATED);
+        CommandManager command = new CommandManager(CommandManager.RegistrationEnvironment.DEDICATED, new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get()));
         try {
             //Attempt to send command
             CommandOutput cmdoutput = new CommandOutput() {
+
                 @Override
-                public void sendSystemMessage(Text message, UUID sender) {
+                public void sendMessage(Text message) {
                     API.sendMessageToDiscord(message.getString(), event.getChannel());
                 }
 
@@ -64,6 +67,11 @@ public class ChatThroughDiscord extends ListenerAdapter {
                 @Override
                 public boolean shouldBroadcastConsoleToOps() {
                     return true;
+                }
+
+                @Override
+                public boolean cannotBeSilenced() {
+                    return CommandOutput.super.cannotBeSilenced();
                 }
             };
             ServerCommandSource cmdsrc = new ServerCommandSource(cmdoutput, new Vec3d(0, 0, 0), new Vec2f(0, 0), API.getServerVariable().getOverworld(), 4, Objects.requireNonNull(event.getMember()).getNickname() + "on Discord", Text.of(Objects.requireNonNull(event.getMember()).getNickname() + "on Discord"), API.getServerVariable(), null);

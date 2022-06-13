@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.11-SNAPSHOT'
+	id 'fabric-loom' version '0.12-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -35,11 +35,13 @@ dependencies {
 	include implementation('com.fasterxml.jackson.core:jackson-core:2.13.1')
 	include implementation('com.fasterxml.jackson.core:jackson-annotations:2.13.1')
 	include implementation("blue.endless:jankson:1.2.0")
-	include implementation("org.json:json:20210307")
+	include implementation("org.json:json:20220320")
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}") {
+		exclude group: "net.fabricmc.fabric-api", module: "fabric-gametest-api-v1"
+	}
 	include implementation("net.dv8tion:JDA:${project.jda_version}") {
 		exclude module: 'opus-java'
 	}

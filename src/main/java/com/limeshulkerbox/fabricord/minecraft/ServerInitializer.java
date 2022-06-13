@@ -6,21 +6,31 @@ import com.limeshulkerbox.fabricord.discord.ChatThroughDiscord;
 import com.limeshulkerbox.fabricord.minecraft.events.ConsoleAppender;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import com.limeshulkerbox.fabricord.other.Config;
+import com.limeshulkerbox.fabricord.other.UUIDConverter;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.message.MessageType;
+import net.minecraft.network.message.SignedMessage;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.filter.FilteredMessage;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.registry.RegistryKey;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import javax.security.auth.login.LoginException;
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.UUID;
@@ -116,7 +126,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
         API.reloadConfig(true);
 
         //Update configs command in MC
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated, registrationEnvironment) -> {
             dispatcher.register(literal("fabricord").then(CommandManager.literal("config").then(CommandManager.literal("reload")
 
                     .executes((context -> {
@@ -133,6 +143,47 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                                 return 1;
                             }))
                     ))));
+        });
+
+        ServerMessageEvents.GAME_MESSAGE.register((message, typeKey) -> {
+            String messageStr = message.getString();
+                if (!config.isOnlyWebhooks()) {
+                    if (config.isChatEnabled()) {
+                        API.sendMessageToDiscordChat(messageStr);
+                    }
+                    if (config.isWebhooksEnabled()) {
+                        EmbedBuilder eb = new EmbedBuilder();
+                        eb.setTitle(messageStr);
+                        eb.setColor(Color.TRANSLUCENT);
+                        API.sendEmbedToDiscordChat(eb);
+                    }
+                } else {
+                    if (config.isWebhooksEnabled()) {
+                        EmbedBuilder eb = new EmbedBuilder();
+                        eb.setTitle(messageStr);
+                        eb.setColor(Color.TRANSLUCENT);
+                        API.sendEmbedToDiscordChat(eb);
+                    } else if (config.isChatEnabled()) {
+                        API.sendMessageToDiscordChat(messageStr);
+                    }
+                }
+        });
+
+        ServerMessageEvents.CHAT_MESSAGE.register((message, sender, typeKey) -> {
+            if (!config.isOnlyWebhooks()) {
+                if (config.isChatEnabled()) {
+                    API.sendMessageToDiscordChat(message.raw().getContent().getString());
+                }
+                if (config.isWebhooksEnabled()) {
+                    API.sendMessageToDiscordWebhook(message.raw().getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), "https://crafatar.com/avatars/" + sender.getUuid() + "?&overlay", config.getWebhookURL());
+                }
+            } else {
+                if (config.isWebhooksEnabled()) {
+                    API.sendMessageToDiscordWebhook(message.raw().getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), "https://crafatar.com/avatars/" + sender.getUuid() + "?&overlay", config.getWebhookURL());
+                } else if (config.isChatEnabled()) {
+                    API.sendMessageToDiscordChat(message.raw().getContent().getString());
+                }
+            }
         });
 
         if (!config.getBotToken().equals("") && !config.getBotToken().equals("Add bot token here")) {

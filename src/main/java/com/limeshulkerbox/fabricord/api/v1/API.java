@@ -9,9 +9,12 @@ import com.limeshulkerbox.fabricord.other.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.MessageType;
+import net.minecraft.network.message.MessageType;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 
 import javax.management.timer.Timer;
 import java.nio.file.Files;
@@ -22,6 +25,8 @@ import java.util.Objects;
 import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.*;
 
 public class API {
+
+    static RegistryKey<MessageType> typeKey = RegistryKey.of(Registry.MESSAGE_TYPE_KEY, new Identifier("fabricord", "discordmsg"));
 
     static String sConfigPath = FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fabricord.json";
     static Path configPath = Paths.get(sConfigPath);
@@ -52,7 +57,7 @@ public class API {
      * @param message This is the message you want to send to the Minecraft chat.
      */
     public static void sendMessageToMinecraft(String message) {
-        server.getPlayerManager().broadcast(Text.of(message), MessageType.CHAT, modUUID);
+        server.getPlayerManager().broadcast(Text.of(message), typeKey);
     }
 
     /**
@@ -109,6 +114,7 @@ public class API {
         WebhookClient client = WebhookClient.withUrl(webHookUrl);
         messageBuilder.setUsername(botName).setAvatarUrl(botAvatarLink).setContent(message);
         client.send(messageBuilder.build());
+        client.close();
     }
 
     /**
@@ -152,24 +158,6 @@ public class API {
      */
     public static void setServerVariable(MinecraftDedicatedServer server) {
         API.server = server;
-    }
-
-    /**
-     * This checks if the target is anywhere to be found in the array.
-     *
-     * @param array  The array you want to check in.
-     * @param target The target you want to check for.
-     * @return Returns true/false if it is there or not.
-     */
-    public static boolean checkIfSomethingIsPresent(String[] array, String target) {
-        if (array != null && target != null) {
-            for (String s : array) {
-                if (target.equals(s) || (target.equals(s.endsWith("*")) && target.equals(target.startsWith(s.replace("*", ""))))) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private static void splitToNChar(String text, int size, String channelID) {
