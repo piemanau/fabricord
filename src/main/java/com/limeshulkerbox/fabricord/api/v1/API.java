@@ -9,12 +9,11 @@ import com.limeshulkerbox.fabricord.other.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.message.MessageSender;
 import net.minecraft.network.message.MessageType;
+import net.minecraft.network.message.SignedMessage;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 
 import javax.management.timer.Timer;
 import java.nio.file.Files;
@@ -25,8 +24,6 @@ import java.util.Objects;
 import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.*;
 
 public class API {
-
-    static RegistryKey<MessageType> typeKey = RegistryKey.of(Registry.MESSAGE_TYPE_KEY, new Identifier("fabricord", "discordmsg"));
 
     static String sConfigPath = FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fabricord.json";
     static Path configPath = Paths.get(sConfigPath);
@@ -57,7 +54,7 @@ public class API {
      * @param message This is the message you want to send to the Minecraft chat.
      */
     public static void sendMessageToMinecraft(String message) {
-        server.getPlayerManager().broadcast(Text.of(message), typeKey);
+        server.getPlayerManager().broadcast(SignedMessage.of(Text.of(message)), new MessageSender(modUUID, Text.of("Fabricord")), MessageType.TELLRAW_COMMAND);
     }
 
     /**
@@ -120,6 +117,7 @@ public class API {
     /**
      * Here you can send a message to multiple places.
      *
+     * @see com.limeshulkerbox.fabricord.api.v2.FabricordAPIv2
      * @param message              This is the message you want to send.
      * @param sendToDiscordConsole This asks if you want to send to the Discord console.
      * @param sendToDiscordChat    This asks if you want to send to the Discord chat.
@@ -160,7 +158,7 @@ public class API {
         API.server = server;
     }
 
-    private static void splitToNChar(String text, int size, String channelID) {
+    public static void splitToNChar(String text, int size, String channelID) {
         int length = text.length();
         for (int i = 0; i < length; i += size) {
             Objects.requireNonNull(getDiscordApi().getTextChannelById(channelID)).sendMessage(text.substring(i, Math.min(length, i + size))).queue();

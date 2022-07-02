@@ -43,11 +43,10 @@ public class ChatThroughDiscord extends ListenerAdapter {
     }
 
     public static void runMinecraftCommand(@NotNull MessageReceivedEvent event) {
-        //Register a new CommandManager
         CommandManager command = new CommandManager(CommandManager.RegistrationEnvironment.DEDICATED, new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get()));
         try {
             //Attempt to send command
-            CommandOutput cmdoutput = new CommandOutput() {
+            ServerCommandSource cmdsrc = new ServerCommandSource(new CommandOutput() {
 
                 @Override
                 public void sendMessage(Text message) {
@@ -73,14 +72,12 @@ public class ChatThroughDiscord extends ListenerAdapter {
                 public boolean cannotBeSilenced() {
                     return CommandOutput.super.cannotBeSilenced();
                 }
-            };
-            ServerCommandSource cmdsrc = new ServerCommandSource(cmdoutput, new Vec3d(0, 0, 0), new Vec2f(0, 0), API.getServerVariable().getOverworld(), 4, Objects.requireNonNull(event.getMember()).getNickname() + "on Discord", Text.of(Objects.requireNonNull(event.getMember()).getNickname() + "on Discord"), API.getServerVariable(), null);
-            command.execute(cmdsrc, event.getMessage().getContentRaw());
-
+            }, new Vec3d(0, 0, 0), new Vec2f(0, 0), API.getServerVariable().getOverworld(), 4, Objects.requireNonNull(event.getMember()).getNickname() + "on Discord", Text.of(Objects.requireNonNull(event.getMember()).getNickname() + "on Discord"), API.getServerVariable(), null);
+            command.execute(cmdsrc, event.getMessage().getContentRaw().substring(1));
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+  }
 
     //Prompts
     public static void serverStartingMethod() {
