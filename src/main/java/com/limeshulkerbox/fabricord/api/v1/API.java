@@ -113,11 +113,13 @@ public class API {
      */
     public static void sendMessageToDiscordWebhook(String message, String botName, String botAvatarLink, String webHookUrl) {
         if (!canUseBot) return;
-        WebhookMessageBuilder messageBuilder = new WebhookMessageBuilder();
-        WebhookClient client = WebhookClient.withUrl(webHookUrl);
-        messageBuilder.setUsername(botName).setAvatarUrl(botAvatarLink).setContent(message);
-        client.send(messageBuilder.build());
-        client.close();
+        if (!(Objects.equals(webHookUrl, "Add webhook URL here") || Objects.equals(webHookUrl, "") || webHookUrl == null)) {
+            WebhookMessageBuilder messageBuilder = new WebhookMessageBuilder();
+            WebhookClient client = WebhookClient.withUrl(webHookUrl);
+            messageBuilder.setUsername(botName).setAvatarUrl(botAvatarLink).setContent(message);
+            client.send(messageBuilder.build());
+            client.close();
+        }
     }
 
     /**
