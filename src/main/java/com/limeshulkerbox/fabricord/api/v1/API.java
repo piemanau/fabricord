@@ -64,10 +64,12 @@ public class API {
      */
     public static void sendMessageToDiscordChat(String message) {
         if (!canUseBot) return;
-        if (message.length() <= messageSplitterAmount) {
-            Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessage(message).queue();
-        } else {
-            splitToNChar(message, messageSplitterAmount, config.getChatChannelID());
+        if (!(Objects.equals(config.getChatChannelID(), "") || config.getChatChannelID() == null)) {
+            if (message.length() <= messageSplitterAmount) {
+                Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessage(message).queue();
+            } else {
+                splitToNChar(message, messageSplitterAmount, config.getChatChannelID());
+            }
         }
     }
 
@@ -78,8 +80,10 @@ public class API {
      */
     public static void sendEmbedToDiscordChat(EmbedBuilder embed) {
         if (!canUseBot) return;
-        if (embed.length() <= messageSplitterAmount) {
-            Objects.requireNonNull(Objects.requireNonNull(getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessageEmbeds(embed.build())).queue();
+        if (!(Objects.equals(config.getChatChannelID(), "") || config.getChatChannelID() == null)) {
+            if (embed.length() <= messageSplitterAmount) {
+                Objects.requireNonNull(Objects.requireNonNull(getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessageEmbeds(embed.build())).queue();
+            }
         }
     }
 
@@ -90,10 +94,12 @@ public class API {
      */
     public static void sendMessageToDiscordConsole(String message) {
         if (!canUseBot) return;
-        if (message.length() <= messageSplitterAmount) {
-            Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getConsoleChannelID())).sendMessage(message).queue();
-        } else {
-            splitToNChar(message, messageSplitterAmount, config.getConsoleChannelID());
+        if (!(Objects.equals(config.getConsoleChannelID(), "") || config.getConsoleChannelID() == null)) {
+            if (message.length() <= messageSplitterAmount) {
+                Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getConsoleChannelID())).sendMessage(message).queue();
+            } else {
+                splitToNChar(message, messageSplitterAmount, config.getConsoleChannelID());
+            }
         }
     }
 

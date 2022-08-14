@@ -56,10 +56,12 @@ public class FabricordAPIv2 {
      */
     public static void sendMessageToDiscordConsole(String message, String sender) {
         if (!canUseBot) return;
-        if (message.length() <= messageSplitterAmount) {
-            Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getConsoleChannelID())).sendMessage("<" + sender + "> " + message).queue();
-        } else {
-            splitToNChar(message, messageSplitterAmount, config.getConsoleChannelID());
+        if (!(Objects.equals(config.getConsoleChannelID(), "") || config.getConsoleChannelID() == null)) {
+            if (message.length() <= messageSplitterAmount) {
+                Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getConsoleChannelID())).sendMessage("<" + sender + "> " + message).queue();
+            } else {
+                splitToNChar(message, messageSplitterAmount, config.getConsoleChannelID());
+            }
         }
     }
 
@@ -71,10 +73,12 @@ public class FabricordAPIv2 {
      */
     public static void sendMessageToDiscordChat(String message, String sender) {
         if (!canUseBot) return;
-        if (message.length() <= messageSplitterAmount) {
-            Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessage("<" + sender + "> " + message).queue();
-        } else {
-            splitToNChar(message, messageSplitterAmount, config.getChatChannelID());
+        if (!(Objects.equals(config.getChatChannelID(), "") || config.getChatChannelID() == null)) {
+            if (message.length() <= messageSplitterAmount) {
+                Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessage("<" + sender + "> " + message).queue();
+            } else {
+                splitToNChar(message, messageSplitterAmount, config.getChatChannelID());
+            }
         }
     }
 }
