@@ -8,7 +8,7 @@ import net.minecraft.server.MinecraftServer;
 
 import java.util.Date;
 
-import static com.limeshulkerbox.fabricord.discord.ChatThroughDiscord.*;
+import static com.limeshulkerbox.fabricord.discord.DiscordChat.*;
 import static com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents.GetServerStartedEvent.thread;
 
 public class GetServerPromptEvents {

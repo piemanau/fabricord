@@ -2,7 +2,7 @@ package com.limeshulkerbox.fabricord.minecraft;
 
 import blue.endless.jankson.Jankson;
 import com.limeshulkerbox.fabricord.api.v1.API;
-import com.limeshulkerbox.fabricord.discord.ChatThroughDiscord;
+import com.limeshulkerbox.fabricord.discord.DiscordChat;
 import com.limeshulkerbox.fabricord.minecraft.events.ConsoleAppender;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import com.limeshulkerbox.fabricord.other.Config;
@@ -91,7 +91,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
     public static void startDiscordBot() {
         //Make the Discord bot come alive
         try {
-            api = JDABuilder.createDefault(config.getBotToken()).addEventListeners(new ChatThroughDiscord()).build();
+            api = JDABuilder.createDefault(config.getBotToken()).addEventListeners(new DiscordChat()).build();
         } catch (LoginException e) {
             e.printStackTrace();
         }
