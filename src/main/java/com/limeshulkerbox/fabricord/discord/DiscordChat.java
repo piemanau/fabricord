@@ -194,7 +194,7 @@ public class DiscordChat extends ListenerAdapter {
     }
 
     private boolean hasAccess(MessageReceivedEvent event) {
-        if (config.getCommandsAccessRoleID() == null) return false;
+        if (config.getCommandsAccessRoleID() == null || config.getCommandsAccessRoleID().equals("")) return false;
         if (Objects.requireNonNull(event.getMember()).getRoles().contains(event.getGuild().getRoleById(config.getCommandsAccessRoleID()))) return true;
         if (config.isSendWrongChannelMessage()) event.getChannel().sendMessage("Sorry <@" + event.getMember().getId() + "> you don't have access to the console. If you believe you should have access, contact an Admin of this discord server.").queue();
         return false;
