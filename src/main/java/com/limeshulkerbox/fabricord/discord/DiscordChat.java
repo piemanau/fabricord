@@ -83,7 +83,7 @@ public class DiscordChat extends ListenerAdapter {
     public static void serverStartingMethod() {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle(config.getServerStartingPrompt());
-        eb.setColor(Color.TRANSLUCENT);
+        eb.setColor(0x2e3136);
         if (config.isOnlyWebhooks()) {
             if (config.isWebhooksEnabled()) {
                 API.sendEmbedToDiscordChat(eb);
@@ -103,7 +103,7 @@ public class DiscordChat extends ListenerAdapter {
     public static void serverStartedMethod() {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle(config.getServerStartedPrompt());
-        eb.setColor(Color.TRANSLUCENT);
+        eb.setColor(0x2e3136);
         if (config.isOnlyWebhooks()) {
             if (config.isWebhooksEnabled()) {
                 API.sendEmbedToDiscordChat(eb);
@@ -123,7 +123,7 @@ public class DiscordChat extends ListenerAdapter {
     public static void serverStoppingMethod() {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle(config.getServerStoppingPrompt());
-        eb.setColor(Color.TRANSLUCENT);
+        eb.setColor(0x2e3136);
         if (config.isOnlyWebhooks()) {
             if (config.isWebhooksEnabled()) {
                 API.sendEmbedToDiscordChat(eb);
@@ -143,7 +143,7 @@ public class DiscordChat extends ListenerAdapter {
     public static void serverStoppedMethod() {
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTitle(config.getServerStoppedPrompt());
-        eb.setColor(Color.TRANSLUCENT);
+        eb.setColor(0x2e3136);
         if (config.isOnlyWebhooks()) {
             if (config.isWebhooksEnabled()) {
                 API.sendEmbedToDiscordChat(eb);

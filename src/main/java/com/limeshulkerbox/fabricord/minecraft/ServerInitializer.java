@@ -149,14 +149,14 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                     if (config.isWebhooksEnabled()) {
                         EmbedBuilder eb = new EmbedBuilder();
                         eb.setTitle(messageStr);
-                        eb.setColor(Color.TRANSLUCENT);
+                        eb.setColor(0x2e3136);
                         API.sendEmbedToDiscordChat(eb);
                     }
                 } else {
                     if (config.isWebhooksEnabled()) {
                         EmbedBuilder eb = new EmbedBuilder();
                         eb.setTitle(messageStr);
-                        eb.setColor(Color.TRANSLUCENT);
+                        eb.setColor(0x2e3136);
                         API.sendEmbedToDiscordChat(eb);
                     } else if (config.isChatEnabled()) {
                         API.sendMessageToDiscordChat(messageStr);
