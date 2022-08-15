@@ -93,7 +93,7 @@ public class API {
      * @param message This is the message you want to send.
      */
     public static void sendMessageToDiscordConsole(String message) {
-        if (!canUseBot) return;
+        if (!canUseBot || !jdaReady) return;
         if (!(Objects.equals(config.getConsoleChannelID(), "") || config.getConsoleChannelID() == null)) {
             if (message.length() <= messageSplitterAmount) {
                 Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getConsoleChannelID())).sendMessage(message).queue();
@@ -230,7 +230,9 @@ public class API {
                     "Server started",
                     "Server stopping",
                     "Server stopped",
-                    false);
+                    false,
+                    true,
+                    2000);
         }
     }
 
@@ -240,6 +242,7 @@ public class API {
     public static void stopDiscordBot() {
         if (getDiscordApi() == null) return;
         jdaReady = false;
+        canUseBot = false;
         getDiscordApi().shutdown();
         setDiscordApiToNull();
     }

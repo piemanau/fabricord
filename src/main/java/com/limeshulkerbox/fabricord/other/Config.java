@@ -79,6 +79,12 @@ public class Config {
     @SerializedName("send_discriminator_to_minecraft")
     private boolean sendDiscriminatorToMinecraft;
 
+
+    @SerializedName("console_buffer_enabled")
+    private boolean consoleBufferEnabled;
+    @SerializedName("console_buffer_amount")
+    private int consoleBufferAmount;
+
     public Config(int configversion,
                   String botToken,
                   String commandsAccessRoleID,
@@ -106,7 +112,10 @@ public class Config {
                   String serverStoppingPrompt,
                   String serverStoppedPrompt,
 
-                  boolean sendDiscriminatorToMinecraft) {
+                  boolean sendDiscriminatorToMinecraft,
+
+                  boolean consoleBufferEnabled,
+                  int consoleBufferAmount) {
 
         this.configVersion = configversion;
 
@@ -137,6 +146,9 @@ public class Config {
         this.serverStoppedPrompt = serverStoppedPrompt;
 
         this.sendDiscriminatorToMinecraft = sendDiscriminatorToMinecraft;
+
+        this.consoleBufferEnabled = consoleBufferEnabled;
+        this.consoleBufferAmount = consoleBufferAmount;
     }
 
     public Config() {

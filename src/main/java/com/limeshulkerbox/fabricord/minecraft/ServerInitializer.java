@@ -3,7 +3,7 @@ package com.limeshulkerbox.fabricord.minecraft;
 import blue.endless.jankson.Jankson;
 import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.discord.DiscordChat;
-import com.limeshulkerbox.fabricord.minecraft.events.ConsoleAppender;
+import com.limeshulkerbox.fabricord.minecraft.events.MinecraftConsoleAppender;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import com.limeshulkerbox.fabricord.other.Config;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -56,14 +56,16 @@ public class ServerInitializer implements DedicatedServerModInitializer {
             true,
             false,
             true,
-            true,
+            false,
             false,
             "Add webhook URL here",
             "Server starting",
             "Server started",
             "Server stopping",
             "Server stopped",
-            false);
+            false,
+            true,
+            2000);
     private static int ticksPassed = 0;
     private static double tps;
 
@@ -183,9 +185,9 @@ public class ServerInitializer implements DedicatedServerModInitializer {
 
             //Register and make appender
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-            ConsoleAppender consoleAppender = new ConsoleAppender();
-            consoleAppender.start();
-            ctx.getRootLogger().addAppender(consoleAppender);
+            MinecraftConsoleAppender minecraftConsoleAppender = new MinecraftConsoleAppender();
+            minecraftConsoleAppender.start();
+            ctx.getRootLogger().addAppender(minecraftConsoleAppender);
             ctx.updateLoggers();
 
             //Register prompt events
