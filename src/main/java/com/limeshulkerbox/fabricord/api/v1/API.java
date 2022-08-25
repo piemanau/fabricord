@@ -8,6 +8,7 @@ import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import com.limeshulkerbox.fabricord.other.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.message.MessageSender;
 import net.minecraft.network.message.MessageType;
@@ -20,6 +21,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.limeshulkerbox.fabricord.minecraft.ServerInitializer.*;
 
@@ -27,11 +32,18 @@ public class API {
 
     static String sConfigPath = FabricLoader.getInstance().getConfigDir() + "/limeshulkerbox/fabricord.json";
     static Path configPath = Paths.get(sConfigPath);
+	final static Logger LOGGER = Logger.getLogger("Fabricord");
 
     private static MinecraftDedicatedServer server;
 
     private static final Timer upTime = new Timer();
 
+	private static Optional<TextChannel> validateTextChannel(MessageChannel channelId) {
+		return Optional.ofNullable(ServerInitializer.getDiscordApi().getTextChannelById(channelId.getId()));
+	}
+	private static Optional<TextChannel> validateTextChannel(String channelId) {
+		return Optional.ofNullable(ServerInitializer.getDiscordApi().getTextChannelById(channelId));
+	}
     /**
      * Send any message to any channel in a Discord server.
      *
@@ -42,7 +54,7 @@ public class API {
     public static void sendMessageToDiscord(String message, MessageChannel channelID) {
         if (!canUseBot) return;
         if (message.length() <= messageSplitterAmount) {
-            Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(channelID.getId())).sendMessage(message).queue();
+	        validateTextChannel(channelID).ifPresentOrElse(a-> a.sendMessage(message).queue(), ()-> LOGGER.log(Level.WARNING, "channel ID could not be found!"));
         } else {
             splitToNChar(message, messageSplitterAmount, channelID.toString());
         }
@@ -66,7 +78,7 @@ public class API {
         if (!canUseBot) return;
         if (!(Objects.equals(config.getChatChannelID(), "") || config.getChatChannelID() == null)) {
             if (message.length() <= messageSplitterAmount) {
-                Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessage(message).queue();
+	            validateTextChannel(config.getChatChannelID()).ifPresentOrElse(a-> a.sendMessage(message).queue(), ()-> LOGGER.log(Level.WARNING, "channel ID could not be found!"));
             } else {
                 splitToNChar(message, messageSplitterAmount, config.getChatChannelID());
             }
@@ -82,7 +94,7 @@ public class API {
         if (!canUseBot) return;
         if (!(Objects.equals(config.getChatChannelID(), "") || config.getChatChannelID() == null)) {
             if (embed.length() <= messageSplitterAmount) {
-                Objects.requireNonNull(Objects.requireNonNull(getDiscordApi().getTextChannelById(config.getChatChannelID())).sendMessageEmbeds(embed.build())).queue();
+	            validateTextChannel(config.getChatChannelID()).ifPresentOrElse(a -> a.sendMessageEmbeds(embed.build()).queue(), ()-> LOGGER.log(Level.WARNING, "channel ID could not be found!") );
             }
         }
     }
@@ -96,7 +108,7 @@ public class API {
         if (!canUseBot || !jdaReady) return;
         if (!(Objects.equals(config.getConsoleChannelID(), "") || config.getConsoleChannelID() == null)) {
             if (message.length() <= messageSplitterAmount) {
-                Objects.requireNonNull(ServerInitializer.getDiscordApi().getTextChannelById(config.getConsoleChannelID())).sendMessage(message).queue();
+	            validateTextChannel(config.getConsoleChannelID()).ifPresentOrElse(a -> a.sendMessage(message).queue(),()-> LOGGER.log(Level.WARNING, "channel ID could not be found!") );
             } else {
                 splitToNChar(message, messageSplitterAmount, config.getConsoleChannelID());
             }
@@ -111,7 +123,7 @@ public class API {
      * @param botAvatarLink This is the avatar the webhook 'bot' will have.
      * @param webHookUrl    This is the URL of the webhook.
      */
-    public static void sendMessageToDiscordWebhook(String message, String botName, String botAvatarLink, String webHookUrl) {
+    public static void sendMessageToDiscordWebhookCraftavatar(String message, String botName, String botAvatarLink, String webHookUrl) {
         if (!canUseBot) return;
         if (!(Objects.equals(webHookUrl, "Add webhook URL here") || Objects.equals(webHookUrl, "") || webHookUrl == null)) {
             WebhookMessageBuilder messageBuilder = new WebhookMessageBuilder();
@@ -122,6 +134,25 @@ public class API {
         }
     }
 
+	/**
+	 * This is where you can send a message through a Discord webhook.
+	 *
+	 * @param message       This is the message you want to send.
+	 * @param botName       This is the name the webhook 'bot' will have.
+	 * @param UUID          This is UUID of player.
+	 * @param webHookUrl    This is the URL of the webhook.
+	 */
+	public static void sendMessageToDiscordWebhook(String message, String botName, UUID UUID, String webHookUrl) {
+		if (!canUseBot) return;
+		if (!(Objects.equals(webHookUrl, "Add webhook URL here") || Objects.equals(webHookUrl, "") || webHookUrl == null)) {
+			WebhookMessageBuilder messageBuilder = new WebhookMessageBuilder();
+			WebhookClient client = WebhookClient.withUrl(webHookUrl);
+			final String alternatePath = "https://mc-heads.net/avatar/";
+			messageBuilder.setUsername(botName).setAvatarUrl(alternatePath + UUID).setContent(message);
+			client.send(messageBuilder.build());
+			client.close();
+		}
+	}
     /**
      * Here you can send a message to multiple places.
      *
@@ -169,7 +200,8 @@ public class API {
     public static void splitToNChar(String text, int size, String channelID) {
         int length = text.length();
         for (int i = 0; i < length; i += size) {
-            Objects.requireNonNull(getDiscordApi().getTextChannelById(channelID)).sendMessage(text.substring(i, Math.min(length, i + size))).queue();
+	        int finalI = i;
+	        validateTextChannel(channelID).ifPresentOrElse(a -> a.sendMessage(text.substring(finalI, Math.min(length, finalI + size))).queue(),()-> LOGGER.log(Level.WARNING, "channel ID could not be found!") );
         }
     }
 
@@ -232,7 +264,8 @@ public class API {
                     "Server stopped",
                     false,
                     true,
-                    2000);
+                    2000,
+	            true);
         }
     }
 
