@@ -50,7 +50,6 @@ public class Config {
     @SerializedName("show_info_logs_in_console")
     private boolean showInfoLogsInConsole;
 
-
     @SerializedName("webhooks_enabled")
     private boolean webhooksEnabled;
 
@@ -85,6 +84,9 @@ public class Config {
     @SerializedName("console_buffer_amount")
     private int consoleBufferAmount;
 
+	@SerializedName("use_alternate_path")
+	private boolean useAlternate;
+
     public Config(int configversion,
                   String botToken,
                   String commandsAccessRoleID,
@@ -115,7 +117,8 @@ public class Config {
                   boolean sendDiscriminatorToMinecraft,
 
                   boolean consoleBufferEnabled,
-                  int consoleBufferAmount) {
+                  int consoleBufferAmount,
+                  boolean useAlternate) {
 
         this.configVersion = configversion;
 
@@ -149,6 +152,7 @@ public class Config {
 
         this.consoleBufferEnabled = consoleBufferEnabled;
         this.consoleBufferAmount = consoleBufferAmount;
+		this.useAlternate = useAlternate;
     }
 
     public Config() {
