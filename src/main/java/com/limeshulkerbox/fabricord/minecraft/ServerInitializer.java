@@ -140,7 +140,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                     ))));
         });
 
-        ServerMessageEvents.GAME_MESSAGE.register((message, typeKey) -> {
+        ServerMessageEvents.GAME_MESSAGE.register((server, message, overlay) -> {
             String messageStr = message.getString();
                 if (!config.isOnlyWebhooks()) {
                     if (config.isChatEnabled()) {
@@ -163,29 +163,30 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                     }
                 }
         });
-        ServerMessageEvents.CHAT_MESSAGE.register((message, sender, typeKey) -> {
+
+        ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) -> {
             if (!config.isOnlyWebhooks()) {
                 if (config.isChatEnabled()) {
-                    API.sendMessageToDiscordChat(String.format("<%s> %s", sender.getName().getString(), message.raw().getContent().getString()));
+                    API.sendMessageToDiscordChat(String.format("<%s> %s", sender.getName().getString(), message.getContent().getString()));
                 }
                 if (config.isWebhooksEnabled()) {
 	                if (config.isUseAlternatePathForSkin()){
-		                API.sendMessageToDiscordWebhook(message.raw().getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), sender.getUuid(), config.getWebhookURL());
+		                API.sendMessageToDiscordWebhook(message.getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), sender.getUuid(), config.getWebhookURL());
 	                }
 	                else {
-		                API.sendMessageToDiscordWebhookCraftavatar(message.raw().getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), "https://crafatar.com/avatars/" + sender.getUuid() + "?&overlay", config.getWebhookURL());
+		                API.sendMessageToDiscordWebhookCraftavatar(message.getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), "https://crafatar.com/avatars/" + sender.getUuid() + "?&overlay", config.getWebhookURL());
 	                }
                 }
             } else {
                 if (config.isWebhooksEnabled()) {
 	                if (config.isUseAlternatePathForSkin()){
-		                API.sendMessageToDiscordWebhook(message.raw().getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), sender.getUuid(), config.getWebhookURL());
+		                API.sendMessageToDiscordWebhook(message.getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), sender.getUuid(), config.getWebhookURL());
 	                }
 	                else {
-		                API.sendMessageToDiscordWebhookCraftavatar(message.raw().getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), "https://crafatar.com/avatars/" + sender.getUuid() + "?&overlay", config.getWebhookURL());
+		                API.sendMessageToDiscordWebhookCraftavatar(message.getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), "https://crafatar.com/avatars/" + sender.getUuid() + "?&overlay", config.getWebhookURL());
 	                }
                 } else if (config.isChatEnabled()) {
-                    API.sendMessageToDiscordChat(String.format("<%s> %s", sender.getName().getString(), message.raw().getContent().getString()));
+                    API.sendMessageToDiscordChat(String.format("<%s> %s", sender.getName().getString(), message.getContent().getString()));
                 }
             }
         });

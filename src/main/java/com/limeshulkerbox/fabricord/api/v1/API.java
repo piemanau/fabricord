@@ -10,9 +10,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.message.MessageSender;
-import net.minecraft.network.message.MessageType;
-import net.minecraft.network.message.SignedMessage;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import net.minecraft.text.Text;
 
@@ -66,7 +63,7 @@ public class API {
      * @param message This is the message you want to send to the Minecraft chat.
      */
     public static void sendMessageToMinecraft(String message) {
-        server.getPlayerManager().broadcast(SignedMessage.of(Text.of(message)), new MessageSender(modUUID, Text.of("Fabricord")), MessageType.TELLRAW_COMMAND);
+        server.getPlayerManager().broadcast(Text.of(message), false);
     }
 
     /**

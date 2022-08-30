@@ -18,7 +18,6 @@ import net.minecraft.util.registry.DynamicRegistryManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -73,7 +72,7 @@ public class DiscordChat extends ListenerAdapter {
                     return CommandOutput.super.cannotBeSilenced();
                 }
             }, new Vec3d(0, 0, 0), new Vec2f(0, 0), API.getServerVariable().getOverworld(), 4, Objects.requireNonNull(event.getMember()).getNickname() + "on Discord", Text.of(Objects.requireNonNull(event.getMember()).getNickname() + "on Discord"), API.getServerVariable(), null);
-            command.execute(cmdsrc, event.getMessage().getContentRaw().substring(1));
+            command.executeWithPrefix(cmdsrc, event.getMessage().getContentRaw());
         } catch (Exception e) {
             e.printStackTrace();
         }

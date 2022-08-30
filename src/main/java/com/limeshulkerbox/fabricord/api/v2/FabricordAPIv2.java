@@ -2,10 +2,6 @@ package com.limeshulkerbox.fabricord.api.v2;
 
 import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
-import net.minecraft.network.message.MessageSender;
-import net.minecraft.network.message.MessageType;
-import net.minecraft.network.message.SignedMessage;
-import net.minecraft.text.Text;
 
 import java.util.Objects;
 
@@ -45,7 +41,7 @@ public class FabricordAPIv2 {
      * @param message This is the message you want to send to the Minecraft chat.
      */
     public static void sendMessageToMinecraft(String message, String sender) {
-        API.getServerVariable().getPlayerManager().broadcast(SignedMessage.of(Text.of(message)), new MessageSender(modUUID, Text.of(sender)), MessageType.CHAT);
+       API.sendMessageToMinecraft(String.format("[%s] %s", sender, message));
     }
 
     /**
