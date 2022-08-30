@@ -169,7 +169,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                     API.sendMessageToDiscordChat(String.format("<%s> %s", sender.getName().getString(), message.raw().getContent().getString()));
                 }
                 if (config.isWebhooksEnabled()) {
-	                if (config.isUseAlternate()){
+	                if (config.isUseAlternatePathForSkin()){
 		                API.sendMessageToDiscordWebhook(message.raw().getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), sender.getUuid(), config.getWebhookURL());
 	                }
 	                else {
@@ -178,7 +178,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
                 }
             } else {
                 if (config.isWebhooksEnabled()) {
-	                if (config.isUseAlternate()){
+	                if (config.isUseAlternatePathForSkin()){
 		                API.sendMessageToDiscordWebhook(message.raw().getContent().getString().replaceFirst("<.+?> ", ""), sender.getName().getString(), sender.getUuid(), config.getWebhookURL());
 	                }
 	                else {

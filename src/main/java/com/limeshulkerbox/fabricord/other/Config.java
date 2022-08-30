@@ -84,8 +84,9 @@ public class Config {
     @SerializedName("console_buffer_amount")
     private int consoleBufferAmount;
 
-	@SerializedName("use_alternate_path")
-	private boolean useAlternate;
+
+	@SerializedName("use_alternate_path_for_skin")
+	private boolean useAlternatePathForSkin;
 
     public Config(int configversion,
                   String botToken,
@@ -118,7 +119,8 @@ public class Config {
 
                   boolean consoleBufferEnabled,
                   int consoleBufferAmount,
-                  boolean useAlternate) {
+
+                  boolean useAlternatePathForSkin) {
 
         this.configVersion = configversion;
 
@@ -152,7 +154,8 @@ public class Config {
 
         this.consoleBufferEnabled = consoleBufferEnabled;
         this.consoleBufferAmount = consoleBufferAmount;
-		this.useAlternate = useAlternate;
+
+		this.useAlternatePathForSkin = useAlternatePathForSkin;
     }
 
     public Config() {
