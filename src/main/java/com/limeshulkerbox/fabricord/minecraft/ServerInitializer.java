@@ -3,8 +3,8 @@ package com.limeshulkerbox.fabricord.minecraft;
 import blue.endless.jankson.Jankson;
 import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.discord.DiscordChat;
-import com.limeshulkerbox.fabricord.minecraft.events.MinecraftConsoleAppender;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
+import com.limeshulkerbox.fabricord.minecraft.events.MinecraftConsoleAppender;
 import com.limeshulkerbox.fabricord.other.Config;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -100,6 +100,18 @@ public class ServerInitializer implements DedicatedServerModInitializer {
         canUseBot = true;
     }
 
+    //enable and disable sending messages
+    private static final ThreadLocal<Boolean> _shouldSendMessage = new ThreadLocal<Boolean>();
+
+    public static boolean shouldSendMessage() {
+        Boolean value = _shouldSendMessage.get();
+        return value == null || value;
+    }
+
+    public static void setShouldSendMessage(boolean value) {
+        _shouldSendMessage.set(value);
+    }
+
     @Override
     public void onInitializeServer() {
 
@@ -141,16 +153,19 @@ public class ServerInitializer implements DedicatedServerModInitializer {
         });
 
         ServerMessageEvents.GAME_MESSAGE.register((server, message, overlay) -> {
+            if (!shouldSendMessage()) {
+                return;
+            }
             String messageStr = message.getString();
-                if (!config.isOnlyWebhooks()) {
-                    if (config.isChatEnabled()) {
-                        API.sendMessageToDiscordChat(messageStr);
-                    }
-                    if (config.isWebhooksEnabled()) {
-                        EmbedBuilder eb = new EmbedBuilder();
-                        eb.setTitle(messageStr);
-                        eb.setColor(0x2e3136);
-                        API.sendEmbedToDiscordChat(eb);
+            if (!config.isOnlyWebhooks()) {
+                if (config.isChatEnabled()) {
+                    API.sendMessageToDiscordChat(messageStr);
+                }
+                if (config.isWebhooksEnabled()) {
+                    EmbedBuilder eb = new EmbedBuilder();
+                    eb.setTitle(messageStr);
+                    eb.setColor(0x2e3136);
+                    API.sendEmbedToDiscordChat(eb);
                     }
                 } else {
                     if (config.isWebhooksEnabled()) {

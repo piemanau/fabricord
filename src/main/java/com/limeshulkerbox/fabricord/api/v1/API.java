@@ -63,7 +63,12 @@ public class API {
      * @param message This is the message you want to send to the Minecraft chat.
      */
     public static void sendMessageToMinecraft(String message) {
-        server.getPlayerManager().broadcast(Text.of(message), false);
+        ServerInitializer.setShouldSendMessage(false);
+        try {
+            server.getPlayerManager().broadcast(Text.of(message), false);
+        } finally {
+            ServerInitializer.setShouldSendMessage(true);
+        }
     }
 
     /**
