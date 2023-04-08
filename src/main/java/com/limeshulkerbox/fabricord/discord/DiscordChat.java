@@ -4,6 +4,7 @@ import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,6 +12,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -164,6 +166,10 @@ public class DiscordChat extends ListenerAdapter {
         ServerInitializer.jdaReady = true;
     }
 
+
+    /**
+     * @link <a href="https://htmlcolorcodes.com/minecraft-color-codes/">Colors hint</a>
+     */
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         super.onMessageReceived(event);
@@ -182,14 +188,45 @@ public class DiscordChat extends ListenerAdapter {
             runMinecraftCommand(event);
             return;
         }
-        if (!isCorrectChannel(event, true)) return;
-        if (!config.isSendDiscriminatorToMinecraft()) {
-            String name = Objects.requireNonNull(event.getMember()).getUser().getName();
-            if (!(event.getMember().getNickname() == null)) name = event.getMember().getNickname();
-            API.sendMessage(String.format("[%s] %s", name, content), false, false, true);
-        } else {
-            API.sendMessage(String.format("<%s> %s", Objects.requireNonNull(event.getMember()).getUser().getAsTag(), content), false, false, true);
+        if (!isCorrectChannel(event, true)) {
+            return;
         }
+
+        // make Discord emojis a bit more readable in-game (turns raw <:pepe_smile:746454647954342082> into :pepe_smile:)
+        content = content.replaceAll("<:(\\w+):[0-9]+>", ":$1:");
+
+        // show Discord attachments useful for sharing screenshots and stuff
+        if (event.getMessage().getAttachments().size() > 0) {
+            for (Message.Attachment a: event.getMessage().getAttachments()) {
+                // todo: make it clickable in-game with net.minecraft.network.chat.Component, have no idea how to import
+                content = content.concat("\n" + a.getUrl());
+            }
+        }
+
+        String reply_author = "";
+        if (event.getMessage().getReferencedMessage() != null) {
+            // if someone replied to minecraft message bot, then capture player's nickname from message
+            String referenced_message = event.getMessage().getReferencedMessage().getContentRaw();
+            if (referenced_message.startsWith("<")) {
+                reply_author = " §5to §3" + referenced_message.substring(referenced_message.indexOf("<") + 1, referenced_message.indexOf(">"));
+            } else {
+                reply_author = " §5to §3" + event.getMessage().getReferencedMessage().getAuthor().getName();
+            }
+        }
+
+        String name;
+        if (!config.isSendDiscriminatorToMinecraft()) {
+            name = Objects.requireNonNull(event.getMember()).getUser().getName();
+            if (!(event.getMember().getNickname() == null)) {
+                name = event.getMember().getNickname();
+            }
+            name = "§9[§f" + name + "§9]";
+        } else {
+            name = Objects.requireNonNull(event.getMember()).getUser().getAsTag();
+            name = "§9<§f" + name + "§9>";
+        }
+
+        API.sendMessage(String.format("%s%s §f%s", name, reply_author, content), false, false, true);
     }
 
     private boolean hasAccess(MessageReceivedEvent event) {
@@ -221,13 +258,23 @@ public class DiscordChat extends ListenerAdapter {
         String[] playerNames = API.getServerVariable().getPlayerManager().getPlayerNames();
         StringBuilder formattedString = new StringBuilder();
         if (API.getServerVariable().getCurrentPlayerCount() != 0) {
-            formattedString.append("Players online are: ");
-            for (int i = 0; i < playerNames.length - 1; i++) {
-                formattedString.append(Objects.requireNonNull(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getName().getString())).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getRegistryKey().getValue().toString()).append(", ");
+            formattedString.append("Players online:\n");
+            for (String playerName: playerNames) {
+                ServerPlayerEntity player = Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerName));
+                String playerWorldName = player.getEntityWorld().getRegistryKey().getValue().toString();
+                playerWorldName = switch (playerWorldName) {
+                    case "minecraft:overworld" -> " in overworld";
+                    case "minecraft:nether", "minecraft:the_nether" -> " in The Nether";
+                    case "minecraft:end", "minecraft:the_end" -> " in The End";
+                    default -> " somewhere else";
+                };
+                formattedString
+                        .append(player.getName().getString())
+                        .append(playerWorldName)
+                        .append("\n");
             }
-            formattedString.append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getName().getString()).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getRegistryKey().getValue().toString());
         }
-        formattedString.append(String.format("\nThere are %o players out of %o players.", API.getServerVariable().getCurrentPlayerCount(), API.getServerVariable().getMaxPlayerCount()));
+        formattedString.append(String.format("\n%o/%o players online", API.getServerVariable().getCurrentPlayerCount(), API.getServerVariable().getMaxPlayerCount()));
         return formattedString.toString();
     }
 }
