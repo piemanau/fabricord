@@ -4,6 +4,7 @@ import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -189,6 +190,14 @@ public class DiscordChat extends ListenerAdapter {
 
         // make Discord emojis a bit more readable in-game (turns raw <:pepe_smile:746454647954342082> into :pepe_smile:)
         content = content.replaceAll("<:(\\w+):[0-9]+>", ":$1:");
+
+        // show Discord attachments useful for sharing screenshots and stuff
+        if (event.getMessage().getAttachments().size() > 0) {
+            for (Message.Attachment a: event.getMessage().getAttachments()) {
+                // todo: make it clickable in-game with net.minecraft.network.chat.Component, have no idea how to import
+                content = content.concat("\n" + a.getUrl());
+            }
+        }
 
         if (!config.isSendDiscriminatorToMinecraft()) {
             String name = Objects.requireNonNull(event.getMember()).getUser().getName();
