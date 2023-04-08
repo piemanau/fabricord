@@ -11,6 +11,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -221,13 +222,23 @@ public class DiscordChat extends ListenerAdapter {
         String[] playerNames = API.getServerVariable().getPlayerManager().getPlayerNames();
         StringBuilder formattedString = new StringBuilder();
         if (API.getServerVariable().getCurrentPlayerCount() != 0) {
-            formattedString.append("Players online are: ");
-            for (int i = 0; i < playerNames.length - 1; i++) {
-                formattedString.append(Objects.requireNonNull(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getName().getString())).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[i])).getEntityWorld().getRegistryKey().getValue().toString()).append(", ");
+            formattedString.append("Players online:\n");
+            for (String playerName: playerNames) {
+                ServerPlayerEntity player = Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerName));
+                String playerWorldName = player.getEntityWorld().getRegistryKey().getValue().toString();
+                playerWorldName = switch (playerWorldName) {
+                    case "minecraft:overworld" -> " in overworld";
+                    case "minecraft:nether", "minecraft:the_nether" -> " in The Nether";
+                    case "minecraft:end", "minecraft:the_end" -> " in The End";
+                    default -> " somewhere else";
+                };
+                formattedString
+                        .append(player.getName().getString())
+                        .append(playerWorldName)
+                        .append("\n");
             }
-            formattedString.append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getName().getString()).append(" in ").append(Objects.requireNonNull(API.getServerVariable().getPlayerManager().getPlayer(playerNames[playerNames.length - 1])).getEntityWorld().getRegistryKey().getValue().toString());
         }
-        formattedString.append(String.format("\nThere are %o players out of %o players.", API.getServerVariable().getCurrentPlayerCount(), API.getServerVariable().getMaxPlayerCount()));
+        formattedString.append(String.format("\n%o/%o players online", API.getServerVariable().getCurrentPlayerCount(), API.getServerVariable().getMaxPlayerCount()));
         return formattedString.toString();
     }
 }
