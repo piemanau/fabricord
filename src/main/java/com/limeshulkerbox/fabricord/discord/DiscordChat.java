@@ -166,6 +166,10 @@ public class DiscordChat extends ListenerAdapter {
         ServerInitializer.jdaReady = true;
     }
 
+
+    /**
+     * @link <a href="https://htmlcolorcodes.com/minecraft-color-codes/">Colors hint</a>
+     */
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         super.onMessageReceived(event);
@@ -204,9 +208,9 @@ public class DiscordChat extends ListenerAdapter {
             // if someone replied to minecraft message bot, then capture player's nickname from message
             String referenced_message = event.getMessage().getReferencedMessage().getContentRaw();
             if (referenced_message.startsWith("<")) {
-                reply_author = " to " + referenced_message.substring(referenced_message.indexOf("<") + 1, referenced_message.indexOf(">"));
+                reply_author = " §5to §3" + referenced_message.substring(referenced_message.indexOf("<") + 1, referenced_message.indexOf(">"));
             } else {
-                reply_author = " to " + event.getMessage().getReferencedMessage().getAuthor().getName();
+                reply_author = " §5to §3" + event.getMessage().getReferencedMessage().getAuthor().getName();
             }
         }
 
@@ -216,13 +220,13 @@ public class DiscordChat extends ListenerAdapter {
             if (!(event.getMember().getNickname() == null)) {
                 name = event.getMember().getNickname();
             }
-            name = "[" + name + "]";
+            name = "§9[§f" + name + "§9]";
         } else {
             name = Objects.requireNonNull(event.getMember()).getUser().getAsTag();
-            name = "<" + name + ">";
+            name = "§9<§f" + name + "§9>";
         }
 
-        API.sendMessage(String.format("%s%s %s", name, reply_author, content), false, false, true);
+        API.sendMessage(String.format("%s%s §f%s", name, reply_author, content), false, false, true);
     }
 
     private boolean hasAccess(MessageReceivedEvent event) {
