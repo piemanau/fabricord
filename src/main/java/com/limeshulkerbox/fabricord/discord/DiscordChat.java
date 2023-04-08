@@ -183,7 +183,13 @@ public class DiscordChat extends ListenerAdapter {
             runMinecraftCommand(event);
             return;
         }
-        if (!isCorrectChannel(event, true)) return;
+        if (!isCorrectChannel(event, true)) {
+            return;
+        }
+
+        // make Discord emojis a bit more readable in-game (turns raw <:pepe_smile:746454647954342082> into :pepe_smile:)
+        content = content.replaceAll("<:(\\w+):[0-9]+>", ":$1:");
+
         if (!config.isSendDiscriminatorToMinecraft()) {
             String name = Objects.requireNonNull(event.getMember()).getUser().getName();
             if (!(event.getMember().getNickname() == null)) name = event.getMember().getNickname();
