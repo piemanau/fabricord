@@ -199,13 +199,30 @@ public class DiscordChat extends ListenerAdapter {
             }
         }
 
-        if (!config.isSendDiscriminatorToMinecraft()) {
-            String name = Objects.requireNonNull(event.getMember()).getUser().getName();
-            if (!(event.getMember().getNickname() == null)) name = event.getMember().getNickname();
-            API.sendMessage(String.format("[%s] %s", name, content), false, false, true);
-        } else {
-            API.sendMessage(String.format("<%s> %s", Objects.requireNonNull(event.getMember()).getUser().getAsTag(), content), false, false, true);
+        String reply_author = "";
+        if (event.getMessage().getReferencedMessage() != null) {
+            // if someone replied to minecraft message bot, then capture player's nickname from message
+            String referenced_message = event.getMessage().getReferencedMessage().getContentRaw();
+            if (referenced_message.startsWith("<")) {
+                reply_author = " to " + referenced_message.substring(referenced_message.indexOf("<") + 1, referenced_message.indexOf(">"));
+            } else {
+                reply_author = " to " + event.getMessage().getReferencedMessage().getAuthor().getName();
+            }
         }
+
+        String name;
+        if (!config.isSendDiscriminatorToMinecraft()) {
+            name = Objects.requireNonNull(event.getMember()).getUser().getName();
+            if (!(event.getMember().getNickname() == null)) {
+                name = event.getMember().getNickname();
+            }
+            name = "[" + name + "]";
+        } else {
+            name = Objects.requireNonNull(event.getMember()).getUser().getAsTag();
+            name = "<" + name + ">";
+        }
+
+        API.sendMessage(String.format("%s%s %s", name, reply_author, content), false, false, true);
     }
 
     private boolean hasAccess(MessageReceivedEvent event) {
