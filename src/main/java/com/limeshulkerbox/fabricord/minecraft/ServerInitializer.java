@@ -10,6 +10,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -22,10 +23,9 @@ import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
-import javax.security.auth.login.LoginException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import static net.minecraft.server.command.CommandManager.literal;
@@ -34,7 +34,6 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class ServerInitializer implements DedicatedServerModInitializer {
 
     public static final Jankson jankson = Jankson.builder().build();
-    public static final UUID modUUID = UUID.fromString("0c4fc385-8b46-4ef2-8375-fcd19d71f45e");
     public static final int messageSplitterAmount = 2000;
     public static boolean canUseBot = false;
     public static Config config;
@@ -92,11 +91,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
 
     public static void startDiscordBot() {
         //Make the Discord bot come alive
-        try {
-            api = JDABuilder.createDefault(config.getBotToken()).addEventListeners(new DiscordChat()).build();
-        } catch (LoginException e) {
-            e.printStackTrace();
-        }
+        api = JDABuilder.createDefault(config.getBotToken()).enableIntents(GatewayIntent.MESSAGE_CONTENT).addEventListeners(new DiscordChat()).build();
         canUseBot = true;
     }
 
@@ -138,15 +133,15 @@ public class ServerInitializer implements DedicatedServerModInitializer {
 
                     .executes((context -> {
                         API.reloadConfig(false);
-                        context.getSource().sendFeedback(Text.of("Successfully updated the config!"), true);
+                        context.getSource().sendFeedback(() -> Text.of("Successfully updated the config!"), true);
                         return 1;
                     }))
 
                     .then(CommandManager.argument("do_restart_discord_bot", BoolArgumentType.bool()).executes((context -> {
                                 if (BoolArgumentType.getBool(context, "do_restart_discord_bot"))
-                                    context.getSource().sendFeedback(Text.of("Attempting to reload the config and discord bot..."), true);
+                                    context.getSource().sendFeedback(() -> Text.of("Attempting to reload the config and discord bot..."), true);
                                 API.reloadConfig(BoolArgumentType.getBool(context, "do_restart_discord_bot"));
-                                context.getSource().sendFeedback(Text.of("Successfully updated the config!"), true);
+                                context.getSource().sendFeedback(() -> Text.of("Successfully updated the config!"), true);
                                 return 1;
                             }))
                     ))));
@@ -182,7 +177,7 @@ public class ServerInitializer implements DedicatedServerModInitializer {
         ServerMessageEvents.CHAT_MESSAGE.register((message, sender, params) -> {
             if (!config.isOnlyWebhooks()) {
                 if (config.isChatEnabled()) {
-                    API.sendMessageToDiscordChat(String.format("<%s> %s", sender.getName().getString(), message.getContent().getString()));
+                    API.sendMessageToDiscordChat(String.format("<%s> %s", sender.getName().getString(), message.signedBody().content()));
                 }
                 if (config.isWebhooksEnabled()) {
 	                if (config.isUseAlternatePathForSkin()){

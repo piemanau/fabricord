@@ -4,20 +4,17 @@ import com.limeshulkerbox.fabricord.api.v1.API;
 import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.DynamicRegistryManager;
+
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -42,7 +39,8 @@ public class DiscordChat extends ListenerAdapter {
     }
 
     public static void runMinecraftCommand(@NotNull MessageReceivedEvent event) {
-        CommandManager command = new CommandManager(CommandManager.RegistrationEnvironment.DEDICATED, new CommandRegistryAccess(DynamicRegistryManager.BUILTIN.get()));
+        var command = API.getServerVariable().getCommandManager();
+        //CommandManager command = new CommandManager(CommandManager.RegistrationEnvironment.DEDICATED, CommandRegistryAccess.of(CommandManager.RegistrationEnvironment.DEDICATED, API.getSaveProperties().getDataConfiguration()));
         try {
             //Attempt to send command
             ServerCommandSource cmdsrc = new ServerCommandSource(new CommandOutput() {
@@ -71,7 +69,7 @@ public class DiscordChat extends ListenerAdapter {
                 public boolean cannotBeSilenced() {
                     return CommandOutput.super.cannotBeSilenced();
                 }
-            }, new Vec3d(0, 0, 0), new Vec2f(0, 0), API.getServerVariable().getOverworld(), 4, Objects.requireNonNull(event.getMember()).getNickname() + "on Discord", Text.of(Objects.requireNonNull(event.getMember()).getNickname() + "on Discord"), API.getServerVariable(), null);
+            }, new Vec3d(0, 0, 0), new Vec2f(0, 0), API.getServerVariable().getOverworld(), 4, Objects.requireNonNull(event.getMember()).getUser().getName() + " on Discord", Text.of(Objects.requireNonNull(event.getMember()).getUser().getName() + " on Discord"), API.getServerVariable(), null);
             command.executeWithPrefix(cmdsrc, event.getMessage().getContentRaw());
         } catch (Exception e) {
             e.printStackTrace();
@@ -160,7 +158,7 @@ public class DiscordChat extends ListenerAdapter {
     }
 
     @Override
-    public void onReady(@Nonnull ReadyEvent event) {
+    public void onReady(@NotNull ReadyEvent event) {
         ServerInitializer.jdaReady = true;
     }
 
@@ -185,10 +183,11 @@ public class DiscordChat extends ListenerAdapter {
         if (!isCorrectChannel(event, true)) return;
         if (!config.isSendDiscriminatorToMinecraft()) {
             String name = Objects.requireNonNull(event.getMember()).getUser().getName();
+            if (!(event.getMember().getUser().getGlobalName() == null)) name = event.getMember().getUser().getGlobalName();
             if (!(event.getMember().getNickname() == null)) name = event.getMember().getNickname();
             API.sendMessage(String.format("[%s] %s", name, content), false, false, true);
         } else {
-            API.sendMessage(String.format("<%s> %s", Objects.requireNonNull(event.getMember()).getUser().getAsTag(), content), false, false, true);
+            API.sendMessage(String.format("<%s> %s", Objects.requireNonNull(event.getMember()).getUser().getName(), content), false, false, true);
         }
     }
 

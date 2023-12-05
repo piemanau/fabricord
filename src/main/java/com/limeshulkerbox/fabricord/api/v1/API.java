@@ -7,13 +7,15 @@ import com.limeshulkerbox.fabricord.minecraft.ServerInitializer;
 import com.limeshulkerbox.fabricord.minecraft.events.GetServerPromptEvents;
 import com.limeshulkerbox.fabricord.other.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.dedicated.MinecraftDedicatedServer;
 import net.minecraft.text.Text;
+import net.minecraft.world.SaveProperties;
 
 import javax.management.timer.Timer;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,9 +35,11 @@ public class API {
 
     private static MinecraftDedicatedServer server;
 
+    private static SaveProperties saveProperties;
+
     private static final Timer upTime = new Timer();
 
-	private static Optional<TextChannel> validateTextChannel(MessageChannel channelId) {
+	private static Optional<TextChannel> validateTextChannel(MessageChannelUnion channelId) {
 		return Optional.ofNullable(ServerInitializer.getDiscordApi().getTextChannelById(channelId.getId()));
 	}
 	private static Optional<TextChannel> validateTextChannel(String channelId) {
@@ -48,10 +52,10 @@ public class API {
      * @param channelID This is the channel you want to send the message in.
      */
 
-    public static void sendMessageToDiscord(String message, MessageChannel channelID) {
+    public static void sendMessageToDiscord(String message, MessageChannelUnion channelID) {
         if (!canUseBot) return;
         if (message.length() <= messageSplitterAmount) {
-	        validateTextChannel(channelID).ifPresentOrElse(a-> a.sendMessage(message).queue(), ()-> LOGGER.log(Level.WARNING, "channel ID could not be found!"));
+	        validateTextChannel(channelID.getId()).ifPresentOrElse(a-> a.sendMessage(message).queue(), ()-> LOGGER.log(Level.WARNING, "channel ID could not be found!"));
         } else {
             splitToNChar(message, messageSplitterAmount, channelID.toString());
         }
@@ -287,5 +291,13 @@ public class API {
      */
     public static Path getConfigPath() {
         return configPath;
+    }
+
+    public static void setSaveProperties(SaveProperties saveProperties) {
+        API.saveProperties = saveProperties;
+    }
+
+    public static SaveProperties getSaveProperties() {
+        return saveProperties;
     }
 }
